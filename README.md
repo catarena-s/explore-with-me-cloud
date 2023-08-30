@@ -1,6 +1,6 @@
 # Explore With Me Cloud
 
-"Explore With Me Cloud" - это альтернативная реализация проекта "Explore With Me" с использованием Spring Cloud. Это микросервисное приложение, предназначенное для планирования событий и создания групп для участия в различных мероприятиях.
+"Explore With Me Cloud" - это альтернативная реализация проекта ["Explore With Me"](https://github.com/catarena-s/java-explore-with-me) с использованием Spring Cloud. Это микросервисное приложение, предназначенное для планирования событий и создания групп для участия в различных мероприятиях.
 
 ## Структура проекта
 
@@ -11,9 +11,9 @@
 
 ## Стек технологий
 
-**Java 17**, **Spring**(Boot, Data, Cloud, Config), **Hibernate**
+**Java 17**, **Spring**(Boot, Data, Cloud, Config), **Hibernate**(JPA), REST, JUnit, Mockito
 
-Lombok, Liquibase, PostgreSQL, Maven, Docker
+Lombok, Liquibase, PostgreSQL, Maven, Docker, Postman
 
 ## TO DO
 1. [ ] Создать сервис Config Service для хранения и получения настроек с GitHub.
@@ -67,6 +67,6 @@ Lombok, Liquibase, PostgreSQL, Maven, Docker
 
 ---
 
-Исходный проект "Explore With Me" доступен [здесь](ссылка_на_оригинальный_проект).
+Исходный проект "Explore With Me" доступен [здесь](https://github.com/catarena-s/java-explore-with-me).
 
 [//]: # (Создано с ❤️ в Explore With Me Cloud)
