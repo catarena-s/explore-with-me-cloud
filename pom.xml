@@ -9,7 +9,8 @@
     <version>1.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>ewmc-git-config</module>
+        <module>ewm-git-config</module>
+        <module>ewm-server</module>
     </modules>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
