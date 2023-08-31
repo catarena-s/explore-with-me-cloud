@@ -12,6 +12,8 @@
         <module>ewm-git-config</module>
         <module>ewm-server</module>
         <module>ewm-gateway</module>
+        <module>ewm-stats-server</module>
+        <module>ewm-common</module>
     </modules>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
