@@ -1,13 +1,13 @@
-package dev.shvetsova.ewmc.common;
+package dev.shvetsova.ewmc.main;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EwmCommonApplicationTests {
+class EwmMainServiceAppTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
 
 }
