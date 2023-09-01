@@ -1,8 +1,8 @@
 package dev.shvetsova.ewmc.main.service.request;
 
-import dev.shvetsova.ewmc.main.dto.request.EventRequestStatusUpdateResult;
-import dev.shvetsova.ewmc.main.dto.request.EventRequestStatusUpdateRequest;
-import dev.shvetsova.ewmc.main.dto.request.ParticipationRequestDto;
+import dev.shvetsova.ewmc.common.dto.request.EventRequestStatusUpdateResult;
+import dev.shvetsova.ewmc.common.dto.request.EventRequestStatusUpdateRequest;
+import dev.shvetsova.ewmc.common.dto.request.ParticipationRequestDto;
 
 import java.util.List;
 
@@ -18,4 +18,6 @@ public interface RequestService {
     ParticipationRequestDto cancelRequest(long userId, long requestId);
 
     List<ParticipationRequestDto> changeVisibilityEventParticipation(long userId, List<Long> ids, boolean hide);
+
+    boolean isExistByRequester(long userId);
 }

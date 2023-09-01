@@ -1,7 +1,7 @@
 package dev.shvetsova.ewmc.main.mapper;
 
-import dev.shvetsova.ewmc.main.dto.compilation.CompilationDto;
-import dev.shvetsova.ewmc.main.dto.compilation.NewCompilationDto;
+import dev.shvetsova.ewmc.common.dto.compilation.CompilationDto;
+import dev.shvetsova.ewmc.common.dto.compilation.NewCompilationDto;
 import dev.shvetsova.ewmc.main.model.Compilation;
 import dev.shvetsova.ewmc.main.model.Event;
 import lombok.AccessLevel;

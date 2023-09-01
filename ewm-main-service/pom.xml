@@ -83,7 +83,7 @@
 			<classifier>jakarta</classifier>
 			<version>${querydsl.version}</version>
 		</dependency>
-	</dependencies>
+    </dependencies>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

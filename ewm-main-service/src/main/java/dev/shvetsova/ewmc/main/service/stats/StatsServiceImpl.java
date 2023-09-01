@@ -1,7 +1,7 @@
 package dev.shvetsova.ewmc.main.service.stats;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.shvetsova.ewmc.main.exception.ResponseException;
+import dev.shvetsova.ewmc.common.exception.ResponseException;
 import dev.shvetsova.ewmc.main.feign.StatsFeignClient;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.main.utils.Constants.END;
-import static dev.shvetsova.ewmc.main.utils.Constants.START;
+import static dev.shvetsova.ewmc.common.Constants.END;
+import static dev.shvetsova.ewmc.common.Constants.START;
 
 @Service
 @RequiredArgsConstructor

@@ -1,6 +1,6 @@
 package dev.shvetsova.ewmc.main.api.pub;
 
-import dev.shvetsova.ewmc.main.dto.category.CategoryDto;
+import dev.shvetsova.ewmc.common.dto.category.CategoryDto;
 import dev.shvetsova.ewmc.main.service.category.CategoryService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static dev.shvetsova.ewmc.main.utils.Constants.FROM;
-import static dev.shvetsova.ewmc.main.utils.Constants.PAGE_SIZE;
+import static dev.shvetsova.ewmc.common.Constants.FROM;
+import static dev.shvetsova.ewmc.common.Constants.PAGE_SIZE;
 
 
 @RestController

@@ -1,6 +1,6 @@
 package dev.shvetsova.ewmc.main.model;
 
-import dev.shvetsova.ewmc.main.enums.EventState;
+import dev.shvetsova.ewmc.common.enums.EventState;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,9 +36,11 @@ public class Event {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initiator_id")
-    private User initiator;
+    //    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "initiator_id")
+//    private User initiator;
+    @Column(name = "initiator_id")
+    private long initiatorId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")

@@ -1,8 +1,8 @@
 package dev.shvetsova.ewmc.main.api.privat;
 
-import dev.shvetsova.ewmc.main.dto.request.EventRequestStatusUpdateRequest;
-import dev.shvetsova.ewmc.main.dto.request.EventRequestStatusUpdateResult;
-import dev.shvetsova.ewmc.main.dto.request.ParticipationRequestDto;
+import dev.shvetsova.ewmc.common.dto.request.EventRequestStatusUpdateRequest;
+import dev.shvetsova.ewmc.common.dto.request.EventRequestStatusUpdateResult;
+import dev.shvetsova.ewmc.common.dto.request.ParticipationRequestDto;
 import dev.shvetsova.ewmc.main.service.request.RequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,5 +79,11 @@ public class PrivateRequestController {
             @RequestParam(value = "ids") List<Long> ids) {
         log.debug("Request received PATCH /users/{}/requests/show?ids={}", userId, ids);
         return requestService.changeVisibilityEventParticipation(userId, ids, false);
+    }
+
+    @GetMapping("/requests/check")
+    public boolean checkRequest(@PathVariable(value = "userId") long userId) {
+        log.debug("Request received GET /users/{}/events", userId);
+        return requestService.isExistByRequester(userId);
     }
 }

@@ -1,6 +1,6 @@
 package dev.shvetsova.ewmc.main.filter;
 
-import dev.shvetsova.ewmc.main.enums.EventState;
+import dev.shvetsova.ewmc.common.enums.EventState;
 import lombok.Builder;
 import lombok.Getter;
 

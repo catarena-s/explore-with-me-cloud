@@ -1,11 +1,11 @@
 package dev.shvetsova.ewmc.main.service.event;
 
-import dev.shvetsova.ewmc.main.dto.event.EventFullDto;
-import dev.shvetsova.ewmc.main.dto.event.EventShortDto;
-import dev.shvetsova.ewmc.main.dto.event.NewEventDto;
-import dev.shvetsova.ewmc.main.dto.event.UpdateEventAdminRequest;
-import dev.shvetsova.ewmc.main.dto.event.UpdateEventUserRequest;
-import dev.shvetsova.ewmc.main.enums.SortType;
+import dev.shvetsova.ewmc.common.dto.event.EventFullDto;
+import dev.shvetsova.ewmc.common.dto.event.EventShortDto;
+import dev.shvetsova.ewmc.common.dto.event.NewEventDto;
+import dev.shvetsova.ewmc.common.dto.event.UpdateEventAdminRequest;
+import dev.shvetsova.ewmc.common.dto.event.UpdateEventUserRequest;
+import dev.shvetsova.ewmc.common.enums.SortType;
 import dev.shvetsova.ewmc.main.model.Event;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -89,4 +89,6 @@ public interface EventService {
     Event findEventById(long eventId);
 
     List<Event> findEventsByIds(List<Long> eventIdList);
+
+    boolean isExistByInitiator(long userId);
 }

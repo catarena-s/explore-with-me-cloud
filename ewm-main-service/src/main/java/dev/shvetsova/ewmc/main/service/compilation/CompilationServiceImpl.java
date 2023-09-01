@@ -1,26 +1,26 @@
 package dev.shvetsova.ewmc.main.service.compilation;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import dev.shvetsova.ewmc.main.dto.compilation.CompilationDto;
-import dev.shvetsova.ewmc.main.dto.compilation.NewCompilationDto;
-import dev.shvetsova.ewmc.main.dto.compilation.UpdateCompilationRequest;
-import dev.shvetsova.ewmc.main.exception.ConflictException;
-import dev.shvetsova.ewmc.main.exception.NotFoundException;
+import dev.shvetsova.ewmc.common.dto.compilation.CompilationDto;
+import dev.shvetsova.ewmc.common.dto.compilation.NewCompilationDto;
+import dev.shvetsova.ewmc.common.dto.compilation.UpdateCompilationRequest;
+import dev.shvetsova.ewmc.common.exception.ConflictException;
+import dev.shvetsova.ewmc.common.exception.NotFoundException;
 import dev.shvetsova.ewmc.main.mapper.CompilationMapper;
 import dev.shvetsova.ewmc.main.model.Compilation;
 import dev.shvetsova.ewmc.main.model.Event;
 import dev.shvetsova.ewmc.main.repository.CompilationRepository;
 import dev.shvetsova.ewmc.main.service.event.EventService;
-import dev.shvetsova.ewmc.main.utils.Constants;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.main.utils.Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND;
+import static dev.shvetsova.ewmc.common.Constants.COMPILATION_WITH_ID_WAS_NOT_FOUND;
+import static dev.shvetsova.ewmc.common.Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +33,7 @@ public class CompilationServiceImpl implements CompilationService {
     public Compilation findCompilationById(long compId) {
         return compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(Constants.COMPILATION_WITH_ID_WAS_NOT_FOUND, compId),
+                        String.format(COMPILATION_WITH_ID_WAS_NOT_FOUND, compId),
                         THE_REQUIRED_OBJECT_WAS_NOT_FOUND));
     }
 
@@ -74,7 +74,7 @@ public class CompilationServiceImpl implements CompilationService {
     public void delete(long compId) {
         if (!compilationRepository.existsById(compId)) {
             throw new NotFoundException(
-                    String.format(Constants.COMPILATION_WITH_ID_WAS_NOT_FOUND, compId),
+                    String.format(COMPILATION_WITH_ID_WAS_NOT_FOUND, compId),
                     THE_REQUIRED_OBJECT_WAS_NOT_FOUND);
         }
         compilationRepository.deleteById(compId);

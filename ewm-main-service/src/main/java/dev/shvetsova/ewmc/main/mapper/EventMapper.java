@@ -1,13 +1,14 @@
 package dev.shvetsova.ewmc.main.mapper;
 
-import dev.shvetsova.ewmc.main.dto.event.EventFullDto;
-import dev.shvetsova.ewmc.main.dto.event.EventShortDto;
-import dev.shvetsova.ewmc.main.dto.event.NewEventDto;
+import dev.shvetsova.ewmc.common.dto.UserMapper;
+import dev.shvetsova.ewmc.common.dto.event.EventFullDto;
+import dev.shvetsova.ewmc.common.dto.event.EventShortDto;
+import dev.shvetsova.ewmc.common.dto.event.NewEventDto;
+import dev.shvetsova.ewmc.common.dto.user.UserDto;
 import dev.shvetsova.ewmc.main.model.Category;
 import dev.shvetsova.ewmc.main.model.Event;
 import dev.shvetsova.ewmc.main.model.Location;
-import dev.shvetsova.ewmc.main.model.User;
-import dev.shvetsova.ewmc.main.enums.EventState;
+import dev.shvetsova.ewmc.common.enums.EventState;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public class EventMapper {
 
     public static Event fromDto(NewEventDto body,
-                                User user,
+                                UserDto user,
                                 Category category,
                                 Location location,
                                 EventState state,
@@ -34,7 +35,7 @@ public class EventMapper {
                 .createdOn(createdOn)
                 .requestModeration(body.isRequestModeration())
                 .category(category)
-                .initiator(user)
+                .initiatorId(user.getId())
                 .location(location)
                 .confirmedRequests(0)
                 .state(state)
@@ -47,7 +48,7 @@ public class EventMapper {
                 .title(event.getTitle())
                 .annotation(event.getAnnotation())
                 .description(event.getDescription())
-                .initiator(UserMapper.toShotDto(event.getInitiator()))
+                .initiator(UserMapper.toShotDto(event.getInitiatorId()))
                 .category(CategoryMapper.toDto(event.getCategory()))
                 .location(LocationMapper.toDto(event.getLocation()))
                 .paid(event.getPaid())
@@ -67,7 +68,7 @@ public class EventMapper {
                 .id(event.getId())
                 .title(event.getTitle())
                 .annotation(event.getAnnotation())
-                .initiator(UserMapper.toShotDto(event.getInitiator()))
+                .initiator(UserMapper.toShotDto(event.getInitiatorId()))
                 .category(CategoryMapper.toDto(event.getCategory()))
                 .paid(event.getPaid())
                 .eventDate(event.getEventDate())

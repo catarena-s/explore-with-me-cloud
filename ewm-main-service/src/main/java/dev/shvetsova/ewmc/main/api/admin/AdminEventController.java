@@ -1,5 +1,8 @@
 package dev.shvetsova.ewmc.main.api.admin;
 
+import dev.shvetsova.ewmc.common.dto.event.EventFullDto;
+import dev.shvetsova.ewmc.common.dto.event.UpdateEventAdminRequest;
+import dev.shvetsova.ewmc.main.service.event.EventService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -7,22 +10,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import dev.shvetsova.ewmc.main.dto.event.EventFullDto;
-import dev.shvetsova.ewmc.main.dto.event.UpdateEventAdminRequest;
-import dev.shvetsova.ewmc.main.service.event.EventService;
-import dev.shvetsova.ewmc.main.utils.Constants;
-
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static dev.shvetsova.ewmc.common.Constants.FROM;
+import static dev.shvetsova.ewmc.common.Constants.PAGE_SIZE;
 import static dev.shvetsova.ewmc.common.Constants.YYYY_MM_DD_HH_MM_SS;
 
 
@@ -49,9 +43,9 @@ public class AdminEventController {
             @RequestParam(value = "rangeEnd", required = false)
             @DateTimeFormat(pattern = YYYY_MM_DD_HH_MM_SS) LocalDateTime rangeEnd,
             //количество событий, которые нужно пропустить для формирования текущего набора
-            @PositiveOrZero @RequestParam(value = "from", defaultValue = Constants.FROM) Integer from,
+            @PositiveOrZero @RequestParam(value = "from", defaultValue = FROM) Integer from,
             //количество событий в наборе
-            @Positive @RequestParam(value = "size", defaultValue = Constants.PAGE_SIZE) Integer size
+            @Positive @RequestParam(value = "size", defaultValue = PAGE_SIZE) Integer size
     ) {
         log.debug("Request received GET /admin/events");
         log.debug("RequestParams: users={},states={},categories={},rangeStart={}, rangeEnd={}, from={}, size={} ",

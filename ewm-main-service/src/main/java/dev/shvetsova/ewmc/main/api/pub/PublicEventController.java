@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import dev.shvetsova.ewmc.main.dto.event.EventFullDto;
-import dev.shvetsova.ewmc.main.dto.event.EventShortDto;
-import dev.shvetsova.ewmc.main.enums.SortType;
+import dev.shvetsova.ewmc.common.dto.event.EventFullDto;
+import dev.shvetsova.ewmc.common.dto.event.EventShortDto;
+import dev.shvetsova.ewmc.common.enums.SortType;
 import dev.shvetsova.ewmc.main.service.event.EventService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static dev.shvetsova.ewmc.common.Constants.FROM;
+import static dev.shvetsova.ewmc.common.Constants.PAGE_SIZE;
 import static dev.shvetsova.ewmc.common.Constants.YYYY_MM_DD_HH_MM_SS;
-import static dev.shvetsova.ewmc.main.utils.Constants.FROM;
-import static dev.shvetsova.ewmc.main.utils.Constants.PAGE_SIZE;
 
 @RestController
 @RequestMapping(path = "/events")

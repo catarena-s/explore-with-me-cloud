@@ -1,24 +1,22 @@
 package dev.shvetsova.ewmc.main.service.category;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import dev.shvetsova.ewmc.main.dto.category.CategoryDto;
-import dev.shvetsova.ewmc.main.dto.category.NewCategoryDto;
-import dev.shvetsova.ewmc.main.exception.ConflictException;
-import dev.shvetsova.ewmc.main.exception.NotFoundException;
+import dev.shvetsova.ewmc.common.dto.category.CategoryDto;
+import dev.shvetsova.ewmc.common.dto.category.NewCategoryDto;
+import dev.shvetsova.ewmc.common.exception.ConflictException;
+import dev.shvetsova.ewmc.common.exception.NotFoundException;
 import dev.shvetsova.ewmc.main.mapper.CategoryMapper;
 import dev.shvetsova.ewmc.main.model.Category;
 import dev.shvetsova.ewmc.main.repository.CategoryRepository;
 import dev.shvetsova.ewmc.main.repository.EventRepository;
-import dev.shvetsova.ewmc.main.utils.Constants;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.main.utils.Constants.CATEGORY_WITH_ID_D_WAS_NOT_FOUND;
-import static dev.shvetsova.ewmc.main.utils.Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND;
+import static dev.shvetsova.ewmc.common.Constants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
         } catch (DataIntegrityViolationException ex) {
             throw new ConflictException(
                     String.format("Category with name='%s' already exists", body.getName()),
-                    Constants.INTEGRITY_CONSTRAINT_HAS_BEEN_VIOLATED);
+                    INTEGRITY_CONSTRAINT_HAS_BEEN_VIOLATED);
         }
     }
 
@@ -50,14 +48,14 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(long catId) {
         if (!categoryRepository.existsById(catId)) {
             throw new NotFoundException(
-                    String.format(Constants.CATEGORY_WITH_ID_D_WAS_NOT_FOUND, catId),
-                    Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND);
+                    String.format(CATEGORY_WITH_ID_D_WAS_NOT_FOUND, catId),
+                    THE_REQUIRED_OBJECT_WAS_NOT_FOUND);
         }
 
         if (eventRepository.existsByCategoryId(catId)) {
             throw new ConflictException(
                     String.format("The category id=%d is not empty", catId),
-                    Constants.FOR_THE_REQUESTED_OPERATION_THE_CONDITIONS_ARE_NOT_MET);
+                    FOR_THE_REQUESTED_OPERATION_THE_CONDITIONS_ARE_NOT_MET);
         }
         categoryRepository.deleteById(catId);
     }
@@ -67,7 +65,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.existsByIdNotAndName(catId, body.getName())) {
             throw new ConflictException(
                     String.format("Another category already exists with name = '%s'", body.getName()),
-                    Constants.INTEGRITY_CONSTRAINT_HAS_BEEN_VIOLATED
+                    INTEGRITY_CONSTRAINT_HAS_BEEN_VIOLATED
             );
         }
         final Category category = findCategoryById(catId);

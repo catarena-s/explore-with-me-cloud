@@ -1,6 +1,6 @@
 package dev.shvetsova.ewmc.main.mapper;
 
-import dev.shvetsova.ewmc.main.dto.location.LocationDto;
+import dev.shvetsova.ewmc.common.dto.location.LocationDto;
 import dev.shvetsova.ewmc.main.model.Location;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

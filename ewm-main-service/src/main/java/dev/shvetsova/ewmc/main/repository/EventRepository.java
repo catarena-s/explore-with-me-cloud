@@ -1,7 +1,7 @@
 package dev.shvetsova.ewmc.main.repository;
 
 import dev.shvetsova.ewmc.main.model.Event;
-import dev.shvetsova.ewmc.main.enums.EventState;
+import dev.shvetsova.ewmc.common.enums.EventState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;

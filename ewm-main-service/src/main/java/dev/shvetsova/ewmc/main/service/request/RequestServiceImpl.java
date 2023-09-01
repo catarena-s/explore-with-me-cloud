@@ -1,24 +1,23 @@
 package dev.shvetsova.ewmc.main.service.request;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import dev.shvetsova.ewmc.main.dto.request.EventRequestStatusUpdateRequest;
-import dev.shvetsova.ewmc.main.dto.request.EventRequestStatusUpdateResult;
-import dev.shvetsova.ewmc.main.dto.request.ParticipationRequestDto;
-import dev.shvetsova.ewmc.main.enums.EventState;
-import dev.shvetsova.ewmc.main.enums.RequestStatus;
-import dev.shvetsova.ewmc.main.exception.ConflictException;
-import dev.shvetsova.ewmc.main.exception.NotFoundException;
+import dev.shvetsova.ewmc.common.dto.request.EventRequestStatusUpdateRequest;
+import dev.shvetsova.ewmc.common.dto.request.EventRequestStatusUpdateResult;
+import dev.shvetsova.ewmc.common.dto.request.ParticipationRequestDto;
+import dev.shvetsova.ewmc.common.dto.user.UserDto;
+import dev.shvetsova.ewmc.common.enums.EventState;
+import dev.shvetsova.ewmc.common.enums.RequestStatus;
+import dev.shvetsova.ewmc.common.exception.ConflictException;
+import dev.shvetsova.ewmc.common.exception.NotFoundException;
+import dev.shvetsova.ewmc.main.feign.UserUserFeignClient;
 import dev.shvetsova.ewmc.main.mapper.RequestMapper;
 import dev.shvetsova.ewmc.main.model.Event;
 import dev.shvetsova.ewmc.main.model.Request;
-import dev.shvetsova.ewmc.main.model.User;
 import dev.shvetsova.ewmc.main.repository.EventRepository;
 import dev.shvetsova.ewmc.main.repository.RequestRepository;
 import dev.shvetsova.ewmc.main.service.event.EventService;
-import dev.shvetsova.ewmc.main.service.user.UserService;
-import dev.shvetsova.ewmc.main.utils.Constants;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,11 +26,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static dev.shvetsova.ewmc.common.Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND;
+import static dev.shvetsova.ewmc.common.enums.RequestStatus.*;
+import static dev.shvetsova.ewmc.main.utils.UsersUtil.checkExistUser;
 import static java.lang.Boolean.FALSE;
-import static dev.shvetsova.ewmc.main.enums.RequestStatus.CANCELED;
-import static dev.shvetsova.ewmc.main.enums.RequestStatus.CONFIRMED;
-import static dev.shvetsova.ewmc.main.enums.RequestStatus.PENDING;
-import static dev.shvetsova.ewmc.main.enums.RequestStatus.REJECTED;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +37,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final EventRepository eventRepository;
 
-    private final UserService userService;
+    private final UserUserFeignClient userService;
     private final EventService eventService;
 
     /**
@@ -61,7 +59,7 @@ public class RequestServiceImpl implements RequestService {
 
         final Event event = eventService.findEventById(eventId);
 //        инициатор события не может добавить запрос на участие в своём событии (Ожидается код ошибки 409)<p>
-        if (event.getInitiator().getId().equals(userId)) {
+        if (event.getInitiatorId() == userId) {
             throw new ConflictException(
                     String.format("UserId=%d is initiator for event with id=%d", userId, eventId),
                     "Conflict Exception");
@@ -77,10 +75,10 @@ public class RequestServiceImpl implements RequestService {
         }
 //        - если для события отключена пре-модерация запросов на участие,
 //        то запрос должен автоматически перейти в состояние подтвержденного
-        final User user = userService.findUserById(userId);
+        final UserDto user = userService.findUserById(userId);
 
         final Request newRequest = Request.builder()
-                .requester(user)
+                .requesterId(user.getId())
                 .event(event)
                 .status((event.getParticipantLimit() == 0) || (!event.getRequestModeration())
                         ? CONFIRMED
@@ -95,18 +93,17 @@ public class RequestServiceImpl implements RequestService {
             eventRepository.save(event);
         }
 
-        ParticipationRequestDto dto = RequestMapper.toDto(savedRequest);
-        return dto;
+        return RequestMapper.toDto(savedRequest);
     }
 
     @Override
     public ParticipationRequestDto cancelRequest(long userId, long requestId) {
-        userService.checkExistById(userId);
+        checkExistUser(userService, userId);
 
         final Request request = requestRepository.findByIdAndRequesterId(requestId, userId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Request with id=%d for userId=%d was not found.", requestId, userId),
-                        Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND));
+                        THE_REQUIRED_OBJECT_WAS_NOT_FOUND));
 
         request.setStatus(CANCELED);
         requestRepository.save(request);
@@ -115,13 +112,14 @@ public class RequestServiceImpl implements RequestService {
         return dto;
     }
 
+
     @Override
     public List<ParticipationRequestDto> changeVisibilityEventParticipation(long userId, List<Long> ids, boolean hide) {
         userService.checkExistById(userId);
 
         final List<Request> requestList = requestRepository.findAllById(ids);
         final boolean allMatchUser = requestList.stream()
-                .allMatch(request -> request.getRequester().getId().equals(userId));
+                .allMatch(request -> request.getRequesterId() == userId);
         if (!allMatchUser) {
             throw new ConflictException("User cannot change the visibility of events in which he does not participate.");
         }
@@ -135,6 +133,11 @@ public class RequestServiceImpl implements RequestService {
         return requestList.stream()
                 .map(RequestMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isExistByRequester(long userId) {
+        return requestRepository.existsByRequesterId(userId);
     }
 
     @Override
@@ -159,8 +162,9 @@ public class RequestServiceImpl implements RequestService {
 
     /**
      * Изменение статуса (подтверждена, отменена) заявок на участие в событии текущего пользователя
-     * @param body Новый статус для заявок на участие в событии текущего пользователя
-     * @param userId id текущего пользователя
+     *
+     * @param body    Новый статус для заявок на участие в событии текущего пользователя
+     * @param userId  id текущего пользователя
      * @param eventId id события текущего пользователя
      * @return - нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие (Ожидается код ошибки 409)<p></p>
      * - статус можно изменить только у заявок, находящихся в состоянии ожидания (Ожидается код ошибки 409)<p></p>
@@ -172,7 +176,7 @@ public class RequestServiceImpl implements RequestService {
         final RequestStatus newStatus = body.getStatus();
         userService.checkExistById(userId);
         final Event event = eventService.findEventById(eventId);
-        if (!event.getInitiator().getId().equals(userId)) {
+        if (event.getInitiatorId() != userId) {
             throw new ConflictException(String.format("User(id=%d) is not the initiator of the event(id=%d).", userId, eventId));
         }
 

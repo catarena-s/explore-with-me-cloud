@@ -2,6 +2,7 @@ package dev.shvetsova.ewmc.main.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
+import dev.shvetsova.ewmc.common.exception.*;
 import jakarta.validation.ConstraintViolationException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package dev.shvetsova.ewmc.main.repository;
 
 import dev.shvetsova.ewmc.main.model.Request;
-import dev.shvetsova.ewmc.main.enums.RequestStatus;
+import dev.shvetsova.ewmc.common.enums.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

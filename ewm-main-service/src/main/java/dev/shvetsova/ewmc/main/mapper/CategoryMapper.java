@@ -1,7 +1,7 @@
 package dev.shvetsova.ewmc.main.mapper;
 
-import dev.shvetsova.ewmc.main.dto.category.CategoryDto;
-import dev.shvetsova.ewmc.main.dto.category.NewCategoryDto;
+import dev.shvetsova.ewmc.common.dto.category.CategoryDto;
+import dev.shvetsova.ewmc.common.dto.category.NewCategoryDto;
 import dev.shvetsova.ewmc.main.model.Category;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

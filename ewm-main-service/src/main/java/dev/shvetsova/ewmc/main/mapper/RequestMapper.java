@@ -1,6 +1,6 @@
 package dev.shvetsova.ewmc.main.mapper;
 
-import dev.shvetsova.ewmc.main.dto.request.ParticipationRequestDto;
+import dev.shvetsova.ewmc.common.dto.request.ParticipationRequestDto;
 import dev.shvetsova.ewmc.main.model.Request;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ public class RequestMapper {
     public static ParticipationRequestDto toDto(Request newRequest) {
         return ParticipationRequestDto.builder()
                 .id(newRequest.getId())
-                .requester(newRequest.getRequester().getId())
+                .requester(newRequest.getRequesterId())
                 .event(newRequest.getEvent().getId())
                 .status(newRequest.getStatus())
                 .created(newRequest.getCreated().format(FORMATTER))

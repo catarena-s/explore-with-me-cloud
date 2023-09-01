@@ -1,57 +1,41 @@
 package dev.shvetsova.ewmc.main.service.event;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import dev.shvetsova.ewmc.main.dto.event.EventFullDto;
-import dev.shvetsova.ewmc.main.dto.event.EventShortDto;
-import dev.shvetsova.ewmc.main.dto.event.NewEventDto;
-import dev.shvetsova.ewmc.main.dto.event.UpdateEventAdminRequest;
-import dev.shvetsova.ewmc.main.dto.event.UpdateEventUserRequest;
-import dev.shvetsova.ewmc.main.dto.location.LocationDto;
-import dev.shvetsova.ewmc.main.enums.EventState;
-import dev.shvetsova.ewmc.main.enums.EventStateAction;
-import dev.shvetsova.ewmc.main.enums.SortType;
-import dev.shvetsova.ewmc.main.exception.ConflictException;
-import dev.shvetsova.ewmc.main.exception.NotFoundException;
-import dev.shvetsova.ewmc.main.exception.ValidateException;
+import dev.shvetsova.ewmc.common.dto.event.*;
+import dev.shvetsova.ewmc.common.dto.location.LocationDto;
+import dev.shvetsova.ewmc.common.dto.user.UserDto;
+import dev.shvetsova.ewmc.common.enums.EventState;
+import dev.shvetsova.ewmc.common.enums.EventStateAction;
+import dev.shvetsova.ewmc.common.enums.SortType;
+import dev.shvetsova.ewmc.common.exception.ConflictException;
+import dev.shvetsova.ewmc.common.exception.NotFoundException;
+import dev.shvetsova.ewmc.common.exception.ValidateException;
+import dev.shvetsova.ewmc.main.feign.UserUserFeignClient;
 import dev.shvetsova.ewmc.main.filter.EventFilter;
 import dev.shvetsova.ewmc.main.filter.EventPredicate;
 import dev.shvetsova.ewmc.main.mapper.EventMapper;
 import dev.shvetsova.ewmc.main.model.Category;
 import dev.shvetsova.ewmc.main.model.Event;
 import dev.shvetsova.ewmc.main.model.Location;
-import dev.shvetsova.ewmc.main.model.User;
 import dev.shvetsova.ewmc.main.repository.EventRepository;
 import dev.shvetsova.ewmc.main.service.category.CategoryService;
 import dev.shvetsova.ewmc.main.service.location.LocationService;
 import dev.shvetsova.ewmc.main.service.stats.StatsService;
-import dev.shvetsova.ewmc.main.service.user.UserService;
-import dev.shvetsova.ewmc.main.utils.Constants;
 import dev.shvetsova.ewmc.main.utils.QPredicate;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-//import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.main.enums.EventState.*;
-import static dev.shvetsova.ewmc.main.enums.EventStateAction.CANCEL_REVIEW;
-import static dev.shvetsova.ewmc.main.enums.EventStateAction.PUBLISH_EVENT;
-import static dev.shvetsova.ewmc.main.enums.EventStateAction.REJECT_EVENT;
-import static dev.shvetsova.ewmc.main.enums.EventStateAction.SEND_TO_REVIEW;
-import static dev.shvetsova.ewmc.main.utils.Constants.EVENT_WITH_ID_D_WAS_NOT_FOUND;
-import static dev.shvetsova.ewmc.main.utils.Constants.START;
-import static dev.shvetsova.ewmc.main.utils.Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND;
+import static dev.shvetsova.ewmc.common.Constants.*;
+import static dev.shvetsova.ewmc.common.enums.EventState.*;
+import static dev.shvetsova.ewmc.common.enums.EventStateAction.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +43,7 @@ public class EventServiceImpl implements EventService {
     private static final String EVENT_DATE_AND_TIME_IS_BEFORE = "Event date and time cannot be earlier than %d hours from the";
     private final EventRepository eventRepository;
 
-    private final UserService userService;
+    private final UserUserFeignClient userFeignClient;
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final StatsService statsService;
@@ -69,7 +53,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto saveEvent(long userId, NewEventDto body) {
 //        дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента
         confirmEventDateIsAfterCurrent(body.getEventDate(), 2);
-        final User user = userService.findUserById(userId);
+        final UserDto user = userFeignClient.findUserById(userId);
         final Category category = categoryService.findCategoryById(body.getCategory());
         final Location location = locationService.findLocation(body.getLocation());
 
@@ -80,7 +64,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEvents(long userId, int from, int size) {
-        userService.checkExistById(userId);
+        userFeignClient.checkExistById(userId);
         final PageRequest page = PageRequest.of(from / size, size);
         final List<Event> events = eventRepository.findAllByInitiatorId(userId, page).getContent();
         return events.stream()
@@ -90,7 +74,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEvent(long userId, long eventId) {
-        userService.checkExistById(userId);
+        userFeignClient.checkExistById(userId);
         final Event event = getEventForUser(userId, eventId);
         return EventMapper.toFullDto(event);
     }
@@ -183,7 +167,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     //Изменение события добавленного текущим пользователем privet api
     public EventFullDto updateEventByUser(UpdateEventUserRequest body, long userId, long eventId) {
-        userService.checkExistById(userId);
+        userFeignClient.checkExistById(userId);
         final Event event = getEventForUser(userId, eventId);
 
         if (event.getState().equals(PUBLISHED)) {
@@ -211,8 +195,8 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto updateEventByAdmin(UpdateEventAdminRequest body, long eventId) {
         final Event event = eventRepository.findById(eventId).orElseThrow(
-                () -> new NotFoundException(String.format(Constants.EVENT_WITH_ID_D_WAS_NOT_FOUND, eventId),
-                        Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND)
+                () -> new NotFoundException(String.format(EVENT_WITH_ID_D_WAS_NOT_FOUND, eventId),
+                        THE_REQUIRED_OBJECT_WAS_NOT_FOUND)
         );
 
         updateData(
@@ -244,6 +228,11 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> findEventsByIds(List<Long> eventIdList) {
         return eventRepository.findAllById(eventIdList);
+    }
+
+    @Override
+    public boolean isExistByInitiator(long userId) {
+        return eventRepository.existsByInitiatorId(userId);
     }
 
     private Map<String, Long> getViewStats(HttpServletRequest request, List<Event> events, boolean unique) {
@@ -435,7 +424,7 @@ public class EventServiceImpl implements EventService {
 
     private void throwIfNotAvailableStatus(Set<EventState> set, EventState currentEventState, EventStateAction newEventState) {
         if (set.contains(currentEventState)) {
-            throw new ConflictException(String.format(Constants.IMPOSSIBLE_S_WHEN_EVENT_STATUS_ONE_OF_S_CURRENT_STATUS_S,
+            throw new ConflictException(String.format(IMPOSSIBLE_S_WHEN_EVENT_STATUS_ONE_OF_S_CURRENT_STATUS_S,
                     newEventState, set.stream().sorted().collect(Collectors.toList()), currentEventState));
         }
     }

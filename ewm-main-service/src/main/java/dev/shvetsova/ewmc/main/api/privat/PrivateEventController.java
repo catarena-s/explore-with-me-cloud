@@ -1,5 +1,10 @@
 package dev.shvetsova.ewmc.main.api.privat;
 
+import dev.shvetsova.ewmc.common.dto.event.EventFullDto;
+import dev.shvetsova.ewmc.common.dto.event.EventShortDto;
+import dev.shvetsova.ewmc.common.dto.event.NewEventDto;
+import dev.shvetsova.ewmc.common.dto.event.UpdateEventUserRequest;
+import dev.shvetsova.ewmc.main.service.event.EventService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -7,25 +12,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import dev.shvetsova.ewmc.main.dto.event.EventFullDto;
-import dev.shvetsova.ewmc.main.dto.event.EventShortDto;
-import dev.shvetsova.ewmc.main.dto.event.NewEventDto;
-import dev.shvetsova.ewmc.main.dto.event.UpdateEventUserRequest;
-import dev.shvetsova.ewmc.main.service.event.EventService;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static dev.shvetsova.ewmc.main.utils.Constants.FROM;
-import static dev.shvetsova.ewmc.main.utils.Constants.PAGE_SIZE;
+import static dev.shvetsova.ewmc.common.Constants.FROM;
+import static dev.shvetsova.ewmc.common.Constants.PAGE_SIZE;
 
 @RestController
 @RequestMapping(path = "/users/{userId}/events")
@@ -64,5 +56,11 @@ public class PrivateEventController {
                                          @Positive @RequestParam(value = "size", defaultValue = PAGE_SIZE) int size) {
         log.debug("Request received GET /users/{}/events?from={}&size={}", userId, from, size);
         return eventService.getEvents(userId, from, size);
+    }
+
+    @GetMapping("/check")
+    public boolean checkEvents(@PathVariable(value = "userId") long userId) {
+        log.debug("Request received GET /users/{}/events", userId);
+        return eventService.isExistByInitiator(userId);
     }
 }

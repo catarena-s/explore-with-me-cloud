@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import dev.shvetsova.ewmc.main.dto.compilation.CompilationDto;
+import dev.shvetsova.ewmc.common.dto.compilation.CompilationDto;
 import dev.shvetsova.ewmc.main.service.compilation.CompilationService;
 
 import java.util.List;
 
-import static dev.shvetsova.ewmc.main.utils.Constants.FROM;
-import static dev.shvetsova.ewmc.main.utils.Constants.PAGE_SIZE;
+import static dev.shvetsova.ewmc.common.Constants.FROM;
+import static dev.shvetsova.ewmc.common.Constants.PAGE_SIZE;
 
 @RestController
 @RequestMapping(path = "/compilations")

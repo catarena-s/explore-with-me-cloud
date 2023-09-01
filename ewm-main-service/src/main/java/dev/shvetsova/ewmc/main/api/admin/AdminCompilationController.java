@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import dev.shvetsova.ewmc.main.dto.compilation.CompilationDto;
-import dev.shvetsova.ewmc.main.dto.compilation.NewCompilationDto;
-import dev.shvetsova.ewmc.main.dto.compilation.UpdateCompilationRequest;
+import dev.shvetsova.ewmc.common.dto.compilation.CompilationDto;
+import dev.shvetsova.ewmc.common.dto.compilation.NewCompilationDto;
+import dev.shvetsova.ewmc.common.dto.compilation.UpdateCompilationRequest;
 import dev.shvetsova.ewmc.main.service.compilation.CompilationService;
 
 
