@@ -1,8 +1,7 @@
-package dev.shvetsova.ewmc.common.enums;
+package dev.shvetsova.ewmc.request.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-//import static ru.practicum.mapper.EnumMapper.getEnumFromString;
 
 public enum RequestStatus {
     PENDING, CONFIRMED, REJECTED, CANCELED;
