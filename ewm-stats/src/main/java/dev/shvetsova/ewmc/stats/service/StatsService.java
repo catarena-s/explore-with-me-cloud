@@ -1,7 +1,7 @@
 package dev.shvetsova.ewmc.stats.service;
 
-import dev.shvetsova.ewmc.common.dto.EndpointHitDto;
-import dev.shvetsova.ewmc.common.dto.ViewStatsDto;
+import dev.shvetsova.ewmc.stats.dto.EndpointHitDto;
+import dev.shvetsova.ewmc.stats.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

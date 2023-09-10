@@ -1,7 +1,7 @@
 package dev.shvetsova.ewmc.stats.controller;
 
-import dev.shvetsova.ewmc.common.dto.EndpointHitDto;
-import dev.shvetsova.ewmc.common.dto.ViewStatsDto;
+import dev.shvetsova.ewmc.stats.dto.EndpointHitDto;
+import dev.shvetsova.ewmc.stats.dto.ViewStatsDto;
 import dev.shvetsova.ewmc.stats.service.StatsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,23 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.common.Constants.FORMATTER;
-import static dev.shvetsova.ewmc.common.Constants.HIT_ENDPOINT;
-import static dev.shvetsova.ewmc.common.Constants.STATS_ENDPOINT;
-import static dev.shvetsova.ewmc.common.Constants.YYYY_MM_DD_HH_MM_SS;
+import static dev.shvetsova.ewmc.stats.utils.Constants.*;
 
 @RestController
 @RequestMapping(path = "/")

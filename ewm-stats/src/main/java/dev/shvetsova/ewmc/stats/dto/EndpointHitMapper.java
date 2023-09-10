@@ -1,6 +1,6 @@
-package dev.shvetsova.ewmc.stats.model;
+package dev.shvetsova.ewmc.stats.dto;
 
-import dev.shvetsova.ewmc.common.dto.EndpointHitDto;
+import dev.shvetsova.ewmc.stats.model.EndpointHit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
