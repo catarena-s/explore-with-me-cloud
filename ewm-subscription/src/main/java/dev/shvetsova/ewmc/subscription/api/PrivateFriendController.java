@@ -1,26 +1,23 @@
-package dev.shvetsova.ewmc.main.api.privat;
+package dev.shvetsova.ewmc.subscription.api;
 
+import dev.shvetsova.ewmc.subscription.dto.event.EventShortDto;
+import dev.shvetsova.ewmc.subscription.dto.user.UserDto;
+import dev.shvetsova.ewmc.subscription.service.subs.FriendService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import dev.shvetsova.ewmc.main.dto.event.EventShortDto;
-import dev.shvetsova.ewmc.main.dto.user.UserDto;
-import dev.shvetsova.ewmc.main.service.subs.FriendService;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static dev.shvetsova.ewmc.main.utils.Constants.FROM;
-import static dev.shvetsova.ewmc.main.utils.Constants.PAGE_SIZE;
+import static dev.shvetsova.ewmc.subscription.utils.Constants.FROM;
+import static dev.shvetsova.ewmc.subscription.utils.Constants.PAGE_SIZE;
+
 
 @RestController
-@RequestMapping(path = "/users/{userId}")
+@RequestMapping(path = "/users/{userId}/sub")
 @RequiredArgsConstructor
 @Slf4j
 @Validated

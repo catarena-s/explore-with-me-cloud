@@ -1,43 +1,39 @@
-package dev.shvetsova.ewmc.main.service.subs;
+package dev.shvetsova.ewmc.subscription.service.subs;
 
-import com.querydsl.core.types.Predicate;
+import dev.shvetsova.ewmc.subscription.dto.subs.FriendshipDto;
+import dev.shvetsova.ewmc.subscription.dto.subs.FriendshipShortDto;
+import dev.shvetsova.ewmc.subscription.dto.user.UserDto;
+import dev.shvetsova.ewmc.subscription.exception.ConflictException;
+import dev.shvetsova.ewmc.subscription.exception.NotFoundException;
+import dev.shvetsova.ewmc.subscription.http.UserClient;
+import dev.shvetsova.ewmc.subscription.mapper.FriendshipMapper;
+import dev.shvetsova.ewmc.subscription.model.Friendship;
+import dev.shvetsova.ewmc.subscription.model.FriendshipState;
+import dev.shvetsova.ewmc.subscription.repo.FriendshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import dev.shvetsova.ewmc.main.dto.subs.FriendshipDto;
-import dev.shvetsova.ewmc.main.dto.subs.FriendshipShortDto;
-import dev.shvetsova.ewmc.main.enums.FriendshipState;
-import dev.shvetsova.ewmc.main.exception.ConflictException;
-import dev.shvetsova.ewmc.main.exception.NotFoundException;
-import dev.shvetsova.ewmc.main.mapper.FriendshipMapper;
-import dev.shvetsova.ewmc.main.model.Friendship;
-import dev.shvetsova.ewmc.main.model.QUser;
-import dev.shvetsova.ewmc.main.model.User;
-import dev.shvetsova.ewmc.main.repository.FriendshipRepository;
-import dev.shvetsova.ewmc.main.service.user.UserService;
-import dev.shvetsova.ewmc.main.utils.QPredicate;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.main.enums.FriendshipState.APPROVED;
-import static dev.shvetsova.ewmc.main.enums.FriendshipState.PENDING;
-import static dev.shvetsova.ewmc.main.enums.FriendshipState.REJECTED;
-import static dev.shvetsova.ewmc.main.model.QFriendship.friendship;
+import static dev.shvetsova.ewmc.subscription.model.FriendshipState.REJECTED;
+
 
 @Service
 @RequiredArgsConstructor
 public class FriendshipServiceImpl implements FriendshipService {
     private final FriendshipRepository friendshipRepository;
 
-    private final UserService userService;
+    private final UserClient userClient;
 
     /**
      * Создать запрос на дружбу
+     *
      * @param followerId Id пользователя подавшего заявку на дружбу
-     * @param userId Id пользователя добавляемого в друзья
+     * @param userId     Id пользователя добавляемого в друзья
      * @return
      */
     @Override
@@ -46,14 +42,18 @@ public class FriendshipServiceImpl implements FriendshipService {
         if (followerId == userId) {
             throw new ConflictException("You can't follow yourself.");
         }
-        final User follower = userService.findUserById(followerId);
-        final User friend = userService.findUserById(userId);
+//        final UserDto follower = userClient.checkExistById(followerId);
+        final UserDto friend = userClient.findUserById(userId);
+        userClient.checkExistById(followerId);
+//        userClient.checkExistById(userId);
+
+
         throwWhenFriendshipExist(followerId, userId);
 
         final Friendship friendshipRequest = Friendship.builder()
-                .follower(follower)
-                .friend(friend)
-                .state(friend.isAutoSubscribe() ? APPROVED : PENDING)
+                .followerId(followerId)
+                .friendId(userId)
+                .state(friend.getIsAutoSubscribe() ? FriendshipState.APPROVED : FriendshipState.PENDING)
                 .createdOn(LocalDateTime.now())
                 .build();
         final Friendship friendship = friendshipRepository.save(friendshipRequest);
@@ -62,8 +62,9 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     /**
      * Подтверждение дружбы
+     *
      * @param userId Id пользователя, получившего запрос на дружбу
-     * @param ids набор идентификаторов запросов на дружбу
+     * @param ids    набор идентификаторов запросов на дружбу
      * @return пользователь со списком принятых запросов
      */
     @Override
@@ -73,14 +74,16 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         throwWhenFriendshipListEmpty(subList);
         confirmUser(userId, subList);
-        confirmFriendshipRequest(subList, Set.of(PENDING));
+        confirmFriendshipRequest(subList, Set.of(FriendshipState.PENDING));
 
         subList.forEach(FriendshipServiceImpl::approveFriendship);
         final List<Friendship> saved = friendshipRepository.saveAll(subList);
         return saved.stream().map(FriendshipMapper::toShortDto).collect(Collectors.toList());
     }
 
-    /** Отклонение запроса на дружбу */
+    /**
+     * Отклонение запроса на дружбу
+     */
     @Override
     @Transactional
     public List<FriendshipShortDto> rejectFriendship(long userId, List<Long> ids) {
@@ -88,52 +91,56 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         throwWhenFriendshipListEmpty(subList);
         confirmUser(userId, subList);
-        confirmFriendshipRequest(subList, Set.of(PENDING, APPROVED));
+        confirmFriendshipRequest(subList, Set.of(FriendshipState.PENDING, FriendshipState.APPROVED));
 
         subList.forEach(FriendshipServiceImpl::rejectFriendship);
         final List<Friendship> saved = friendshipRepository.saveAll(subList);
         return saved.stream().map(FriendshipMapper::toShortDto).collect(Collectors.toList());
     }
 
-    /** Получить фолловером списка запросов на дружбу */
+    /**
+     * Получить фолловером списка запросов на дружбу
+     */
     @Override
     @Transactional(readOnly = true)
     public List<FriendshipShortDto> getFriendshipRequests(long userId, String filter) {
-        userService.checkExistById(userId);
-        throwWhenWrongFilter(filter, Set.of("ALL", PENDING.name(), APPROVED.name(), REJECTED.name()));
-        return getRequestByFilter(filter, friendship.follower, userId);
+        userClient.checkExistById(userId);
+
+        throwWhenWrongFilter(filter, Set.of("ALL", FriendshipState.PENDING.name(), FriendshipState.APPROVED.name(), FriendshipState.REJECTED.name()));
+        List<Friendship> f = ("ALL".equalsIgnoreCase(filter))
+                ? friendshipRepository.findAllByFollowerId(userId)
+                : friendshipRepository.findAllByFollowerIdAndState(userId, FriendshipState.from(filter));
+        return f.stream().map(FriendshipMapper::toShortDto).toList();
     }
 
-    /** Получить пользователем списка поданных запросов на дружбу пользователем */
+    /**
+     * Получить пользователем списка поданных запросов на дружбу пользователем
+     */
     @Override
     @Transactional(readOnly = true)
     public List<FriendshipShortDto> getIncomingFriendRequests(long userId, String filter) {
-        userService.checkExistById(userId);
-        throwWhenWrongFilter(filter, Set.of("ALL", PENDING.name(), APPROVED.name(), REJECTED.name()));
-        return getRequestByFilter(filter, friendship.friend, userId);
+        userClient.checkExistById(userId);
+        throwWhenWrongFilter(filter, Set.of("ALL", FriendshipState.PENDING.name(), FriendshipState.APPROVED.name(),
+                FriendshipState.REJECTED.name()));
+
+        List<Friendship> f = ("ALL".equalsIgnoreCase(filter))
+                ? friendshipRepository.findAllByFriendId(userId)
+                : friendshipRepository.findAllByFriendIdAndState(userId, FriendshipState.from(filter));
+        return f.stream().map(FriendshipMapper::toShortDto).toList();
     }
 
-    /** Отмена запроса на дружбу */
+    /**
+     * Отмена запроса на дружбу
+     */
     @Override
     @Transactional
     public void deleteFriendshipRequest(long followerId, long subsId) {
-        userService.checkExistById(followerId);
+        userClient.checkExistById(followerId);
         if (!friendshipRepository.existsByIdAndFollowerId(subsId, followerId)) {
             throw new NotFoundException("Friendship request no exist.");
         }
 
         friendshipRepository.deleteByFollowerIdAndId(followerId, subsId);
-    }
-
-    private List<FriendshipShortDto> getRequestByFilter(String filter, QUser user, long userId) {
-        final List<Predicate> eq = ("ALL".equalsIgnoreCase(filter))
-                ? List.of(user.id.eq(userId))
-                : List.of(user.id.eq(userId), friendship.state.eq(FriendshipState.from(filter)));
-
-        final Predicate predicate = QPredicate.buildAnd(eq);
-        final List<Friendship> subs = (List<Friendship>) friendshipRepository.findAll(predicate);
-
-        return subs.stream().map(FriendshipMapper::toShortDto).collect(Collectors.toList());
     }
 
     private void throwWhenFriendshipListEmpty(List<Friendship> subList) {
@@ -163,17 +170,17 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     private void confirmUser(long userId, List<Friendship> subs) {
-        final boolean allMatchUser = subs.stream().allMatch(s -> s.getFriend().getId() == userId);
+        final boolean allMatchUser = subs.stream().allMatch(s -> s.getFriendId() == userId);
         if (!allMatchUser) {
             throw new ConflictException("You can change only your requests.");
         }
     }
 
     private static void approveFriendship(Friendship f) {
-        f.setState(APPROVED);
+        f.setState(FriendshipState.APPROVED);
     }
 
     private static void rejectFriendship(Friendship f) {
-        f.setState(REJECTED);
+        f.setState(FriendshipState.REJECTED);
     }
 }

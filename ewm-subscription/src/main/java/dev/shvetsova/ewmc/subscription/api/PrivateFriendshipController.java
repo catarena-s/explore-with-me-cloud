@@ -1,5 +1,8 @@
-package dev.shvetsova.ewmc.main.api.privat;
+package dev.shvetsova.ewmc.subscription.api;
 
+import dev.shvetsova.ewmc.subscription.dto.subs.FriendshipDto;
+import dev.shvetsova.ewmc.subscription.dto.subs.FriendshipShortDto;
+import dev.shvetsova.ewmc.subscription.service.subs.FriendshipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import dev.shvetsova.ewmc.main.dto.subs.FriendshipShortDto;
-import dev.shvetsova.ewmc.main.dto.subs.FriendshipDto;
-import dev.shvetsova.ewmc.main.service.subs.FriendshipService;
+
 
 import java.util.List;
 

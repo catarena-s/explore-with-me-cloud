@@ -1,7 +1,8 @@
-package dev.shvetsova.ewmc.main.service.subs;
+package dev.shvetsova.ewmc.subscription.service.subs;
 
-import dev.shvetsova.ewmc.main.dto.subs.FriendshipShortDto;
-import dev.shvetsova.ewmc.main.dto.subs.FriendshipDto;
+
+import dev.shvetsova.ewmc.subscription.dto.subs.FriendshipDto;
+import dev.shvetsova.ewmc.subscription.dto.subs.FriendshipShortDto;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
-package dev.shvetsova.ewmc.main.service.subs;
+package dev.shvetsova.ewmc.subscription.service.subs;
 
-import dev.shvetsova.ewmc.main.dto.event.EventShortDto;
-import dev.shvetsova.ewmc.main.dto.user.UserDto;
+import dev.shvetsova.ewmc.subscription.dto.event.EventShortDto;
+import dev.shvetsova.ewmc.subscription.dto.user.UserDto;
 
 import java.util.List;
 
