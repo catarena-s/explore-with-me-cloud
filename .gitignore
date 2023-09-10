@@ -14,13 +14,4 @@
 *.rar
 
 
-/.idea/.gitignore
-/.idea/encodings.xml
-/.idea/explore-with-me-cloud.iml
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/vcs.xml
-/.idea/dataSources.xml
-/.idea/checkstyleidea-libs/readme.txt
-/.idea/dictionaries/Katreena.xml
-/.idea/checkstyle-idea.xml
+/.idea/*
