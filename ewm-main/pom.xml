@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.shvetsova.ewmc</groupId>
+        <artifactId>explore-with-me-cloud</artifactId>
+        <version>1.0</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <artifactId>ewm-main</artifactId>
+    <version>0.0.1</version>
+    <name>ewm-main</name>
+    <packaging>pom</packaging>
+    <description>ewm-main</description>
+    <modules>
+        <module>ewm-compilation</module>
+        <module>ewm-users</module>
+        <module>ewm-event</module>
+        <module>ewm-request</module>
+        <module>ewm-subscription</module>
+    </modules>
+    <properties>
+        <java.version>17</java.version>
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.shvetsova.ewmc</groupId>
+            <artifactId>ewm-dto</artifactId>
+            <version>0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.shvetsova.ewmc</groupId>
+            <artifactId>ewm-utils</artifactId>
+            <version>0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

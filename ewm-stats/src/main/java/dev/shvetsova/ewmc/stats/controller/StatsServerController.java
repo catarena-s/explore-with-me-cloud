@@ -1,7 +1,7 @@
 package dev.shvetsova.ewmc.stats.controller;
 
-import dev.shvetsova.ewmc.stats.dto.EndpointHitDto;
-import dev.shvetsova.ewmc.stats.dto.ViewStatsDto;
+import dev.shvetsova.ewmc.dto.stats.EndpointHitDto;
+import dev.shvetsova.ewmc.dto.stats.ViewStatsDto;
 import dev.shvetsova.ewmc.stats.service.StatsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.stats.utils.Constants.*;
+import static dev.shvetsova.ewmc.utils.Constants.*;
 
 @RestController
 @RequestMapping(path = "/")
