@@ -1,11 +1,10 @@
 package dev.shvetsova.ewmc.event.api;
 
-import dev.shvetsova.ewmc.dto.event.EventShortDto;
-import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateRequest;
-import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateResult;
 import dev.shvetsova.ewmc.dto.event.EventFullDto;
+import dev.shvetsova.ewmc.dto.event.EventShortDto;
 import dev.shvetsova.ewmc.dto.event.NewEventDto;
 import dev.shvetsova.ewmc.dto.event.UpdateEventUserRequest;
+import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateRequest;
 import dev.shvetsova.ewmc.event.service.event.EventService;
 import dev.shvetsova.ewmc.utils.Constants;
 import jakarta.validation.Valid;
@@ -80,11 +79,10 @@ public class PrivateEventController {
     }
 
     @PatchMapping("/{eventId}/requests")
-    public EventRequestStatusUpdateResult changeRequestStatus(@RequestBody EventRequestStatusUpdateRequest body,
-                                                              @PathVariable(value = "userId") long userId,
-                                                              @PathVariable(value = "eventId") long eventId) {
+    public void changeRequestStatus(@RequestBody EventRequestStatusUpdateRequest body,
+                                    @PathVariable(value = "userId") long userId,
+                                    @PathVariable(value = "eventId") long eventId) {
         log.debug("Request received PATCH /users/{}/events/{}/requests : {}", userId, eventId, body);
-//        return requestService.changeRequestStatus(body, userId, eventId);
-        return null;
+        eventService.changeRequestStatus(body, userId, eventId);
     }
 }

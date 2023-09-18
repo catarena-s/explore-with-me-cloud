@@ -1,5 +1,6 @@
 package dev.shvetsova.ewmc.subscription.service.subs;
 
+import dev.shvetsova.ewmc.dto.mq.EventInfoMq;
 import dev.shvetsova.ewmc.dto.event.EventShortDto;
 import dev.shvetsova.ewmc.dto.user.UserDto;
 
@@ -13,4 +14,6 @@ public interface FriendService {
     List<EventShortDto> getFriendEvents(long followerId, int from, int size);
 
     List<UserDto> getFollowers(long userId);
+
+    void sendNotificationToFriends(EventInfoMq eventInfoMq);
 }

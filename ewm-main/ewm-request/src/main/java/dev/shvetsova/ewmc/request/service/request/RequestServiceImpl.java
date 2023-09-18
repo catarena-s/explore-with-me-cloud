@@ -1,9 +1,12 @@
 package dev.shvetsova.ewmc.request.service.request;
 
 import dev.shvetsova.ewmc.dto.event.EventFullDto;
+import dev.shvetsova.ewmc.dto.mq.RequestMqDto;
+import dev.shvetsova.ewmc.dto.notification.NewNotificationDto;
 import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateRequest;
 import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateResult;
 import dev.shvetsova.ewmc.dto.request.ParticipationRequestDto;
+import dev.shvetsova.ewmc.enums.MessageType;
 import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.request.http.EventClient;
@@ -11,6 +14,7 @@ import dev.shvetsova.ewmc.request.http.UserClient;
 import dev.shvetsova.ewmc.request.mapper.RequestMapper;
 import dev.shvetsova.ewmc.request.model.Request;
 import dev.shvetsova.ewmc.request.model.RequestStatus;
+import dev.shvetsova.ewmc.request.mq.NotificationSupplier;
 import dev.shvetsova.ewmc.request.repository.RequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,9 +27,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static dev.shvetsova.ewmc.request.model.RequestStatus.*;
 import static dev.shvetsova.ewmc.utils.Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND;
 import static dev.shvetsova.ewmc.utils.Constants.USER_WITH_ID_D_WAS_NOT_FOUND;
-import static dev.shvetsova.ewmc.request.model.RequestStatus.*;
 import static dev.shvetsova.ewmc.utils.UsersUtil.checkExistUser;
 import static java.lang.Boolean.FALSE;
 
@@ -36,6 +40,8 @@ public class RequestServiceImpl implements RequestService {
 
     private final UserClient userClient;
     private final EventClient eventClient;
+
+    private final NotificationSupplier notificationSupplier;
 
     /**
      * - нельзя добавить повторный запрос (Ожидается код ошибки 409)<p>
@@ -94,6 +100,8 @@ public class RequestServiceImpl implements RequestService {
         if (newRequest.getStatus().equals(CONFIRMED)) {
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventClient.upConfirmedRequests(userId, eventId);
+        } else {
+            sendNotification(event.getInitiator().getId(), eventId, MessageType.REQUEST, "Get Participation Request to event.");
         }
 
         return RequestMapper.toDto(savedRequest);
@@ -110,9 +118,7 @@ public class RequestServiceImpl implements RequestService {
 
         request.setStatus(CANCELED);
         requestRepository.save(request);
-
-        ParticipationRequestDto dto = RequestMapper.toDto(request);
-        return dto;
+        return RequestMapper.toDto(request);
     }
 
 
@@ -150,12 +156,24 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
+    public void changeStatusRequests(RequestMqDto requestMqDto) {
+        final RequestStatus newStatus = RequestStatus.from(requestMqDto.getNewStatus());
+        final List<Request> requestList = requestRepository.findAllById(requestMqDto.getRequest());
+        final MessageType messageType = CONFIRMED.equals(newStatus) ? MessageType.REQUEST_CONFIRMED : MessageType.REQUEST_REJECTED;
+        final long userId = requestMqDto.getUserId();
+        final long eventId = requestMqDto.getEventId();
+        requestList.forEach(r -> {
+            r.setStatus(newStatus);
+            sendNotification(userId, eventId, messageType, "Changed status Participation Request to event.");
+        });
+        requestRepository.saveAll(requestList);
+    }
+
+    @Override
     public List<ParticipationRequestDto> getEventParticipants(long userId, long eventId) {
         userClient.checkExistById(userId);
-        //todo поправиь скрипт
         final List<Request> requestList = requestRepository.findAllByEventId(eventId);
-        //requestRepository.findAllByEvent_InitiatorIdAndEventId(userId, eventId);
-
         return requestList.stream()
                 .map(RequestMapper::toDto)
                 .collect(Collectors.toList());
@@ -216,17 +234,25 @@ public class RequestServiceImpl implements RequestService {
         checkStatus(newStatus);
 
         if (REJECTED.equals(newStatus)) {
-            requestList.forEach(r -> r.setStatus(REJECTED));
+            requestList.forEach(r -> {
+                r.setStatus(REJECTED);
+                sendNotification(event.getInitiator().getId(), eventId, MessageType.REQUEST_REJECTED, "Rejected Participation Request to event.");
+            });
             rejectedList.addAll(requestList.stream()
                     .map(RequestMapper::toDto)
                     .toList());
+
+
         }
 
         if (CONFIRMED.equals(newStatus)) {
             // если для события лимит заявок равен 0 или отключена пре-модерация заявок,
             // то подтверждение заявок не требуется
             if ((participantLimit == 0) || FALSE.equals(isRequestModeration)) {
-                requestList.forEach(r -> r.setStatus(CONFIRMED));
+                requestList.forEach(r -> {
+                    r.setStatus(CONFIRMED);
+
+                });
                 final List<ParticipationRequestDto> confirmedList = requestList.stream()
                         .map(RequestMapper::toDto)
                         .collect(Collectors.toList());
@@ -239,16 +265,16 @@ public class RequestServiceImpl implements RequestService {
             for (Request r : requestList) {
                 if (currentConfirmed < participantLimit) {
                     r.setStatus(CONFIRMED);
+                    sendNotification(event.getInitiator().getId(), eventId, MessageType.REQUEST_CONFIRMED, "Confirmed Participation Request to event.");
                     currentConfirmed++;
                 } else {
                     r.setStatus(REJECTED);
+                    sendNotification(event.getInitiator().getId(), eventId, MessageType.REQUEST_REJECTED, "Rejected Participation Request to event.");
                 }
             }
 
             event.setConfirmedRequests(currentConfirmed);
             eventClient.upConfirmedRequests(userId, eventId);
-            //todo отправить сообщение увеличить число ConfirmedRequests у евента
-//            eventRepository.save(event);
 
             confirmedDto.addAll(requestList.stream()
                     .filter(RequestServiceImpl::isConfirmedRequest)
@@ -278,5 +304,14 @@ public class RequestServiceImpl implements RequestService {
 
     private static boolean isRejectedRequest(Request r) {
         return REJECTED.equals(r.getStatus());
+    }
+
+    private void sendNotification(Long userId, long senderId, MessageType messageType, String text) {
+        notificationSupplier.sendNewMessage(NewNotificationDto.builder()
+                .userId(userId)
+                .senderId(senderId)
+                .messageType(messageType)
+                .text(text)
+                .build());
     }
 }

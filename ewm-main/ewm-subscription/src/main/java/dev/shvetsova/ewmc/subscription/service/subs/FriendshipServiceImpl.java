@@ -1,14 +1,17 @@
 package dev.shvetsova.ewmc.subscription.service.subs;
 
+import dev.shvetsova.ewmc.dto.notification.NewNotificationDto;
 import dev.shvetsova.ewmc.dto.subs.FriendshipDto;
 import dev.shvetsova.ewmc.dto.subs.FriendshipShortDto;
 import dev.shvetsova.ewmc.dto.user.UserDto;
+import dev.shvetsova.ewmc.enums.MessageType;
 import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.subscription.http.UserClient;
 import dev.shvetsova.ewmc.subscription.mapper.FriendshipMapper;
 import dev.shvetsova.ewmc.subscription.model.Friendship;
 import dev.shvetsova.ewmc.subscription.model.FriendshipState;
+import dev.shvetsova.ewmc.subscription.mq.NotificationSupplier;
 import dev.shvetsova.ewmc.subscription.repo.FriendshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.subscription.model.FriendshipState.REJECTED;
+import static dev.shvetsova.ewmc.enums.MessageType.*;
+import static dev.shvetsova.ewmc.subscription.model.FriendshipState.*;
 
 
 @Service
@@ -28,13 +32,13 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final FriendshipRepository friendshipRepository;
 
     private final UserClient userClient;
+    private final NotificationSupplier notificationSupplier;
 
     /**
      * Создать запрос на дружбу
      *
      * @param followerId Id пользователя подавшего заявку на дружбу
      * @param userId     Id пользователя добавляемого в друзья
-     * @return
      */
     @Override
     @Transactional
@@ -42,21 +46,21 @@ public class FriendshipServiceImpl implements FriendshipService {
         if (followerId == userId) {
             throw new ConflictException("You can't follow yourself.");
         }
-//        final UserDto follower = userClient.checkExistById(followerId);
-        final UserDto friend = userClient.findUserById(userId);
         userClient.checkExistById(followerId);
-//        userClient.checkExistById(userId);
-
+        final UserDto friend = userClient.findUserById(userId);
 
         throwWhenFriendshipExist(followerId, userId);
 
         final Friendship friendshipRequest = Friendship.builder()
                 .followerId(followerId)
                 .friendId(userId)
-                .state(friend.getIsAutoSubscribe() ? FriendshipState.APPROVED : FriendshipState.PENDING)
+                .state(friend.getIsAutoSubscribe() ? APPROVED : PENDING)
                 .createdOn(LocalDateTime.now())
                 .build();
         final Friendship friendship = friendshipRepository.save(friendshipRequest);
+        sendNotification(followerId, userId, FRIENDSHIP_REQUEST, "Request friendship");
+
+
         return FriendshipMapper.toDto(friendship);
     }
 
@@ -74,10 +78,14 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         throwWhenFriendshipListEmpty(subList);
         confirmUser(userId, subList);
-        confirmFriendshipRequest(subList, Set.of(FriendshipState.PENDING));
+        confirmFriendshipRequest(subList, Set.of(PENDING));
 
         subList.forEach(FriendshipServiceImpl::approveFriendship);
         final List<Friendship> saved = friendshipRepository.saveAll(subList);
+        for (Long id : ids){
+            sendNotification(id, userId, FRIENDSHIP_APPROVED, "Friendship was APPROVED.");
+        }
+
         return saved.stream().map(FriendshipMapper::toShortDto).collect(Collectors.toList());
     }
 
@@ -91,11 +99,23 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         throwWhenFriendshipListEmpty(subList);
         confirmUser(userId, subList);
-        confirmFriendshipRequest(subList, Set.of(FriendshipState.PENDING, FriendshipState.APPROVED));
+        confirmFriendshipRequest(subList, Set.of(PENDING, APPROVED));
 
         subList.forEach(FriendshipServiceImpl::rejectFriendship);
         final List<Friendship> saved = friendshipRepository.saveAll(subList);
+        for (Long id : ids){
+            sendNotification(id, userId, FRIENDSHIP_REJECTED, "Friendship was REJECTED.");
+        }
         return saved.stream().map(FriendshipMapper::toShortDto).collect(Collectors.toList());
+    }
+
+    private void sendNotification(Long userId, long senderId, MessageType messageType, String text) {
+        notificationSupplier.sendNewMessage(NewNotificationDto.builder()
+                .userId(userId)
+                .senderId(senderId)
+                .messageType(messageType)
+                .text(text)
+                .build());
     }
 
     /**
@@ -106,10 +126,10 @@ public class FriendshipServiceImpl implements FriendshipService {
     public List<FriendshipShortDto> getFriendshipRequests(long userId, String filter) {
         userClient.checkExistById(userId);
 
-        throwWhenWrongFilter(filter, Set.of("ALL", FriendshipState.PENDING.name(), FriendshipState.APPROVED.name(), FriendshipState.REJECTED.name()));
+        throwWhenWrongFilter(filter, Set.of("ALL", PENDING.name(), APPROVED.name(), REJECTED.name()));
         List<Friendship> f = ("ALL".equalsIgnoreCase(filter))
                 ? friendshipRepository.findAllByFollowerId(userId)
-                : friendshipRepository.findAllByFollowerIdAndState(userId, FriendshipState.from(filter));
+                : friendshipRepository.findAllByFollowerIdAndState(userId, from(filter));
         return f.stream().map(FriendshipMapper::toShortDto).toList();
     }
 
@@ -120,12 +140,12 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Transactional(readOnly = true)
     public List<FriendshipShortDto> getIncomingFriendRequests(long userId, String filter) {
         userClient.checkExistById(userId);
-        throwWhenWrongFilter(filter, Set.of("ALL", FriendshipState.PENDING.name(), FriendshipState.APPROVED.name(),
-                FriendshipState.REJECTED.name()));
+        throwWhenWrongFilter(filter, Set.of("ALL", PENDING.name(), APPROVED.name(),
+                REJECTED.name()));
 
         List<Friendship> f = ("ALL".equalsIgnoreCase(filter))
                 ? friendshipRepository.findAllByFriendId(userId)
-                : friendshipRepository.findAllByFriendIdAndState(userId, FriendshipState.from(filter));
+                : friendshipRepository.findAllByFriendIdAndState(userId, from(filter));
         return f.stream().map(FriendshipMapper::toShortDto).toList();
     }
 
@@ -177,10 +197,10 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     private static void approveFriendship(Friendship f) {
-        f.setState(FriendshipState.APPROVED);
+        f.setState(APPROVED);
     }
 
     private static void rejectFriendship(Friendship f) {
-        f.setState(FriendshipState.REJECTED);
+        f.setState(REJECTED);
     }
 }

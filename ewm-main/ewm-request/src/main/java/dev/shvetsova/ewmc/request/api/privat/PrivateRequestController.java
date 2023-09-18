@@ -26,13 +26,13 @@ public class PrivateRequestController {
         return requestService.addParticipationRequest(userId, eventId);
     }
 
-    @PatchMapping("/events/{eventId}/requests")
-    public EventRequestStatusUpdateResult changeRequestStatus(@RequestBody EventRequestStatusUpdateRequest body,
-                                                              @PathVariable(value = "userId") long userId,
-                                                              @PathVariable(value = "eventId") long eventId) {
-        log.debug("Request received PATCH /users/{}/events/{}/requests : {}", userId, eventId, body);
-        return requestService.changeRequestStatus(body, userId, eventId);
-    }
+//    @PatchMapping("/events/{eventId}/requests")
+//    public EventRequestStatusUpdateResult changeRequestStatus(@RequestBody EventRequestStatusUpdateRequest body,
+//                                                              @PathVariable(value = "userId") long userId,
+//                                                              @PathVariable(value = "eventId") long eventId) {
+//        log.debug("Request received PATCH /users/{}/events/{}/requests : {}", userId, eventId, body);
+//        return requestService.changeRequestStatus(body, userId, eventId);
+//    }
 
     @GetMapping("/events/{eventId}/requests")
     public List<ParticipationRequestDto> getEventParticipants(

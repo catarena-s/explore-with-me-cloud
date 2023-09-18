@@ -3,22 +3,27 @@ package dev.shvetsova.ewmc.event.service.event;
 import com.querydsl.core.types.Predicate;
 import dev.shvetsova.ewmc.dto.event.*;
 import dev.shvetsova.ewmc.dto.location.LocationDto;
+import dev.shvetsova.ewmc.dto.mq.EventInfoMq;
+import dev.shvetsova.ewmc.dto.mq.RequestMqDto;
+import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateRequest;
 import dev.shvetsova.ewmc.event.enums.EventState;
 import dev.shvetsova.ewmc.event.enums.EventStateAction;
 import dev.shvetsova.ewmc.event.enums.SortType;
 import dev.shvetsova.ewmc.event.http.RequestClient;
 import dev.shvetsova.ewmc.event.http.UserClient;
-import dev.shvetsova.ewmc.event.utils.filter.EventFilter;
-import dev.shvetsova.ewmc.event.utils.filter.EventPredicate;
 import dev.shvetsova.ewmc.event.mapper.EventMapper;
 import dev.shvetsova.ewmc.event.model.Category;
 import dev.shvetsova.ewmc.event.model.Event;
 import dev.shvetsova.ewmc.event.model.Location;
+import dev.shvetsova.ewmc.event.mq.EventSupplier;
+import dev.shvetsova.ewmc.event.mq.RequestsSupplier;
 import dev.shvetsova.ewmc.event.repo.EventRepository;
 import dev.shvetsova.ewmc.event.service.category.CategoryService;
 import dev.shvetsova.ewmc.event.service.location.LocationService;
 import dev.shvetsova.ewmc.event.service.stats.StatsService;
 import dev.shvetsova.ewmc.event.utils.QPredicate;
+import dev.shvetsova.ewmc.event.utils.filter.EventFilter;
+import dev.shvetsova.ewmc.event.utils.filter.EventPredicate;
 import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.exception.ValidateException;
@@ -35,6 +40,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static dev.shvetsova.ewmc.utils.UsersUtil.checkExistUser;
+import static java.lang.Boolean.FALSE;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +55,9 @@ public class EventServiceImpl implements EventService {
     private final LocationService locationService;
     private final StatsService statsService;
 
+    private final RequestsSupplier requestsSupplier;
+    private final EventSupplier eventSupplier;
+
     @Override
     @Transactional
     public EventFullDto saveEvent(long userId, NewEventDto body) {
@@ -59,8 +68,9 @@ public class EventServiceImpl implements EventService {
         final Location location = locationService.findLocation(body.getLocation());
 
         final Event event = EventMapper.fromDto(body, userId, category, location, EventState.PENDING, LocalDateTime.now());
-
-        return EventMapper.toFullDto(eventRepository.save(event));
+        eventRepository.save(event);
+        eventSupplier.newEventFromUser(new EventInfoMq(userId, event.getId()));
+        return EventMapper.toFullDto(event);
     }
 
     @Override
@@ -223,6 +233,82 @@ public class EventServiceImpl implements EventService {
         );
         event.setConfirmedRequests(event.getConfirmedRequests() + 1);
         eventRepository.save(event);
+    }
+
+    @Override
+    @Transactional
+    public void changeRequestStatus(EventRequestStatusUpdateRequest body, long userId, long eventId) {
+        userClient.checkExistById(userId);
+        final Event event = eventRepository.findById(eventId).orElseThrow(
+                () -> new NotFoundException(String.format(Constants.EVENT_WITH_ID_D_WAS_NOT_FOUND, eventId),
+                        Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND)
+        );
+
+        if (event.getInitiatorId() != userId) {
+            throw new ConflictException(String.format("User(id=%d) is not the initiator of the event(id=%d).", userId, eventId));
+        }
+        String newStatus = body.getStatus();
+        if ("REJECTED".equals(newStatus)) {
+            requestsSupplier.changeStatusRequests(RequestMqDto.builder()
+                    .userId(userId)
+                    .eventId(eventId)
+                    .request(body.getRequestIds())
+                    .newStatus(newStatus)
+                    .build());
+            return;
+        }
+        if ("CONFIRMED".equals(newStatus)) {
+            final long participantLimit = event.getParticipantLimit();
+            int currentConfirmed = event.getConfirmedRequests();
+            // нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие
+            // (Ожидается код ошибки 409)
+            if (participantLimit > 0 && participantLimit == currentConfirmed) {
+                throw new ConflictException(
+                        "The limit on confirmations for this event has already been reached.",
+                        "Conflict confirmed exception");
+            }
+
+            final Boolean isRequestModeration = event.getRequestModeration();
+            if ((participantLimit == 0) || FALSE.equals(isRequestModeration)) {
+                requestsSupplier.changeStatusRequests(RequestMqDto.builder()
+                        .userId(userId)
+                        .eventId(eventId)
+                        .request(body.getRequestIds())
+                        .newStatus(newStatus)
+                        .build());
+                return;
+            }
+            // - если при подтверждении данной заявки, лимит заявок для события исчерпан,
+            // то все неподтверждённые заявки необходимо отклонить
+            final List<Long> rejectedRequests = new ArrayList<>();
+            final List<Long> confirmedRequests = new ArrayList<>();
+            for (Long requestId : body.getRequestIds()) {
+                if (currentConfirmed < participantLimit) {
+                    confirmedRequests.add(requestId);
+                    currentConfirmed++;
+                } else {
+                    rejectedRequests.add(requestId);
+                }
+            }
+            event.setConfirmedRequests(currentConfirmed);
+            if (!confirmedRequests.isEmpty()) {
+                requestsSupplier.changeStatusRequests(RequestMqDto.builder()
+                        .userId(userId)
+                        .eventId(eventId)
+                        .request(confirmedRequests)
+                        .newStatus("CONFIRMED")
+                        .build());
+            }
+            if (!rejectedRequests.isEmpty()) {
+                requestsSupplier.changeStatusRequests(RequestMqDto.builder()
+                        .userId(userId)
+                        .eventId(eventId)
+                        .request(rejectedRequests)
+                        .newStatus("REJECTED")
+                        .build());
+            }
+            eventRepository.save(event);
+        }
     }
 
     @Override
