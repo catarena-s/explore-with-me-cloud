@@ -1,7 +1,7 @@
-package dev.shvetsova.compilation.repo;
+package dev.shvetsova.ewmc.compilation.repo;
 
-import dev.shvetsova.compilation.model.CompilationEvent;
-import dev.shvetsova.compilation.model.CompilationEventKey;
+import dev.shvetsova.ewmc.compilation.model.CompilationEvent;
+import dev.shvetsova.ewmc.compilation.model.CompilationEventKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

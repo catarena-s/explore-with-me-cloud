@@ -1,4 +1,4 @@
-package dev.shvetsova.compilation.exception;
+package dev.shvetsova.ewmc.compilation.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.shvetsova.ewmc.exception.*;

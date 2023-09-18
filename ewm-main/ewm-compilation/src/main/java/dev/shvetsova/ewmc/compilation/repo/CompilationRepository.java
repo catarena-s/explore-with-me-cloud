@@ -1,6 +1,6 @@
-package dev.shvetsova.compilation.repo;
+package dev.shvetsova.ewmc.compilation.repo;
 
-import dev.shvetsova.compilation.model.Compilation;
+import dev.shvetsova.ewmc.compilation.model.Compilation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;

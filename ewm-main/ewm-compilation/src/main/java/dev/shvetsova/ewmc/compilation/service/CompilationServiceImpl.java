@@ -1,12 +1,12 @@
-package dev.shvetsova.compilation.service.compilation;
+package dev.shvetsova.ewmc.compilation.service;
 
-import dev.shvetsova.compilation.http.EventClient;
-import dev.shvetsova.compilation.mapper.CompilationMapper;
-import dev.shvetsova.compilation.model.Compilation;
-import dev.shvetsova.compilation.model.CompilationEvent;
-import dev.shvetsova.compilation.model.CompilationEventKey;
-import dev.shvetsova.compilation.repo.CompilationEventRepository;
-import dev.shvetsova.compilation.repo.CompilationRepository;
+import dev.shvetsova.ewmc.compilation.http.EventClient;
+import dev.shvetsova.ewmc.compilation.mapper.CompilationMapper;
+import dev.shvetsova.ewmc.compilation.model.Compilation;
+import dev.shvetsova.ewmc.compilation.model.CompilationEvent;
+import dev.shvetsova.ewmc.compilation.model.CompilationEventKey;
+import dev.shvetsova.ewmc.compilation.repo.CompilationEventRepository;
+import dev.shvetsova.ewmc.compilation.repo.CompilationRepository;
 import dev.shvetsova.ewmc.dto.compilation.CompilationDto;
 import dev.shvetsova.ewmc.dto.compilation.NewCompilationDto;
 import dev.shvetsova.ewmc.dto.compilation.UpdateCompilationRequest;

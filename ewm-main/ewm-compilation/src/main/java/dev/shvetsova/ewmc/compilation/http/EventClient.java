@@ -1,4 +1,4 @@
-package dev.shvetsova.compilation.http;
+package dev.shvetsova.ewmc.compilation.http;
 
 import dev.shvetsova.ewmc.dto.event.EventShortDto;
 import org.springframework.cloud.openfeign.FeignClient;

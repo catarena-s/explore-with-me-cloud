@@ -1,4 +1,4 @@
-package dev.shvetsova.compilation.model;
+package dev.shvetsova.ewmc.compilation.model;
 
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;

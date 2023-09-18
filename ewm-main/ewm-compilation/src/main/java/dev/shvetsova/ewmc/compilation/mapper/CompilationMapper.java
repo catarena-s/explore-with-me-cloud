@@ -1,6 +1,6 @@
-package dev.shvetsova.compilation.mapper;
+package dev.shvetsova.ewmc.compilation.mapper;
 
-import dev.shvetsova.compilation.model.Compilation;
+import dev.shvetsova.ewmc.compilation.model.Compilation;
 import dev.shvetsova.ewmc.dto.compilation.CompilationDto;
 import dev.shvetsova.ewmc.dto.compilation.NewCompilationDto;
 import dev.shvetsova.ewmc.dto.event.EventShortDto;

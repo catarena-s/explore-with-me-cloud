@@ -1,4 +1,4 @@
-package dev.shvetsova.compilation.exception;
+package dev.shvetsova.ewmc.compilation.exception;
 
 import dev.shvetsova.ewmc.exception.ApiExceptionHandler;
 import lombok.extern.slf4j.Slf4j;

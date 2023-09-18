@@ -1,6 +1,6 @@
-package dev.shvetsova.compilation.api;
+package dev.shvetsova.ewmc.compilation.api;
 
-import dev.shvetsova.compilation.service.compilation.CompilationService;
+import dev.shvetsova.ewmc.compilation.service.CompilationService;
 import dev.shvetsova.ewmc.dto.compilation.CompilationDto;
 import dev.shvetsova.ewmc.dto.compilation.NewCompilationDto;
 import dev.shvetsova.ewmc.dto.compilation.UpdateCompilationRequest;
