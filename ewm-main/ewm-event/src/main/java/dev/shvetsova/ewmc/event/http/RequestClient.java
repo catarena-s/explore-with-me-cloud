@@ -10,9 +10,8 @@ import java.util.List;
 @FeignClient(name = "ewm-users")
 public interface RequestClient {
 
-    @GetMapping("/users/{userId}/friends/requests")
-    List<Long> getParticipateEventList(@PathVariable(value = "userId") long userId,
-                                       @RequestParam(value = "friendsId") List<Long> friendsId);
+    @GetMapping("/users/friends/requests")
+    List<Long> getParticipateEventList(@RequestParam(value = "friendsId") List<Long> friendsId);
 
 }
 

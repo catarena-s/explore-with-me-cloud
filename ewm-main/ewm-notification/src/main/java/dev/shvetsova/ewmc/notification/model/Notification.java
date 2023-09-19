@@ -23,10 +23,10 @@ public class Notification {
     private String text;
 
     @Column(name = "user_id")
-    private long userId;
+    private String userId;
 
     @Column(name = "sender_id")
-    private long senderId;
+    private String senderId;
 
     private boolean read;
 

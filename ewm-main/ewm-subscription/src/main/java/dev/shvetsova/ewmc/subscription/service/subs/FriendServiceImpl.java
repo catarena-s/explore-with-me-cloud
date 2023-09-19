@@ -9,7 +9,6 @@ import dev.shvetsova.ewmc.subscription.http.EventClient;
 import dev.shvetsova.ewmc.subscription.http.RequestClient;
 import dev.shvetsova.ewmc.subscription.http.UserClient;
 import dev.shvetsova.ewmc.subscription.model.Friendship;
-import dev.shvetsova.ewmc.subscription.mq.MessageAction;
 import dev.shvetsova.ewmc.subscription.mq.NotificationSupplier;
 import dev.shvetsova.ewmc.subscription.repo.FriendshipRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static dev.shvetsova.ewmc.utils.UsersUtil.checkExistUser;
 
 @Service
 @RequiredArgsConstructor
@@ -35,15 +32,13 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<UserDto> getFriends(long userId) {
-        checkExistUser(userClient, userId);
+    public List<UserDto> getFriends(String userId) {
         return userClient.getUserList(userId, friendshipRepository.findAllFriends(userId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserDto> getFollowers(long userId) {
-        checkExistUser(userClient, userId);
+    public List<UserDto> getFollowers(String userId) {
         return userClient.getUserList(userId, friendshipRepository.findAllFollowers(userId));
     }
 
@@ -54,7 +49,7 @@ public class FriendServiceImpl implements FriendService {
             notificationSupplier.sendNewMessage(NewNotificationDto.builder()
                     .text("New event from yor friend")
                     .userId(f.getFollowerId())
-                    .senderId(eventId)
+                    .senderId(String.valueOf(eventId))
                     .messageType(MessageType.EVENT)
                     .build());
         });
@@ -65,20 +60,16 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<EventShortDto> getParticipateEvents(long followerId, int from, int size) {
-        checkExistUser(userClient, followerId);
+    public List<EventShortDto> getParticipateEvents(String followerId, int from, int size) {
         List<Long> allFriends = friendshipRepository.findAllFriends(followerId);
         List<Long> eventListIds = requestClient.getParticipateEventList(followerId, allFriends);
-        List<EventShortDto> eventList = eventClient.getEventListByIds(eventListIds);
-        return eventList;
+        return eventClient.getEventListByIds(eventListIds);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventShortDto> getFriendEvents(long followerId, int from, int size) {
-        checkExistUser(userClient, followerId);
+    public List<EventShortDto> getFriendEvents(String followerId, int from, int size) {
         List<Long> allFriends = friendshipRepository.findAllFriends(followerId);
-        List<EventShortDto> eventList = eventClient.getEventList(followerId, allFriends);
-        return eventList;
+        return eventClient.getEventList(followerId, allFriends);
     }
 }

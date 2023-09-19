@@ -8,21 +8,19 @@ import dev.shvetsova.ewmc.dto.mq.RequestMqDto;
 import java.util.List;
 
 public interface RequestService {
-    ParticipationRequestDto addParticipationRequest(long userId, long eventId);
+    ParticipationRequestDto addParticipationRequest(String userId, long eventId);
 
-    List<ParticipationRequestDto> getEventParticipants(long userId, long eventId);
+    List<ParticipationRequestDto> getEventParticipants(String userId, long eventId);
 
-    EventRequestStatusUpdateResult changeRequestStatus(EventRequestStatusUpdateRequest body, long userId, long eventId);
+    List<ParticipationRequestDto> getUserRequests(String userId);
 
-    List<ParticipationRequestDto> getUserRequests(long userId);
+    ParticipationRequestDto cancelRequest(String userId, long requestId);
 
-    ParticipationRequestDto cancelRequest(long userId, long requestId);
+    List<ParticipationRequestDto> changeVisibilityEventParticipation(String userId, List<Long> ids, boolean hide);
 
-    List<ParticipationRequestDto> changeVisibilityEventParticipation(long userId, List<Long> ids, boolean hide);
+    boolean isExistByRequester(String userId);
 
-    boolean isExistByRequester(long userId);
-
-    List<Long> getFriendsEventRequests(long userId, List<Long> friendsId);
+    List<Long> getFriendsEventRequests(String userId, List<Long> friendsId);
 
     void changeStatusRequests(RequestMqDto payload);
 }

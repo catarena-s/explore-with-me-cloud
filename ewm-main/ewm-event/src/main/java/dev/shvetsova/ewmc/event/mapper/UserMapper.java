@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
 
-    public static UserShortDto toShotDto(long userId) {
+    public static UserShortDto toShotDto(String userId) {
         return UserShortDto.builder()
                 .id(userId)
                 .build();

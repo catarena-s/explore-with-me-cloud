@@ -12,7 +12,7 @@ import java.util.List;
 public interface EventClient {
 
     @GetMapping("/users/{userId}/events/fiends")
-    List<EventShortDto> getEventList(@PathVariable(value = "userId") long userId,
+    List<EventShortDto> getEventList(@PathVariable(value = "userId") String userId,
                                      @RequestParam(value = "friendsId") List<Long> friendsId);
 
     @GetMapping("/events/list")

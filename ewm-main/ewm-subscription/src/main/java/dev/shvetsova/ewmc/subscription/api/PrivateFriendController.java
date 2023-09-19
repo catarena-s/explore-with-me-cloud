@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +18,7 @@ import static dev.shvetsova.ewmc.utils.Constants.FROM;
 import static dev.shvetsova.ewmc.utils.Constants.PAGE_SIZE;
 
 @RestController
-@RequestMapping(path = "/users/{userId}/sub")
+@RequestMapping(path = "/users/sub")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -26,10 +28,11 @@ public class PrivateFriendController {
 
     /**
      * Получить список друзей пользователя<br>
-     * GET /users/{userId}/friends
+     * GET /users/friends
      */
     @GetMapping("/friends")
-    public List<UserDto> getFriends(@PathVariable("userId") long userId) {
+    public List<UserDto> getFriends(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         log.debug("Request received POST '/users/{}/friends'", userId);
         return friendService.getFriends(userId);
     }
@@ -39,7 +42,8 @@ public class PrivateFriendController {
      * GET /users/{userId}/followers
      */
     @GetMapping("/followers")
-    public List<UserDto> getFollowers(@PathVariable("userId") long userId) {
+    public List<UserDto> getFollowers(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         log.debug("Request received POST '/users/{}'", userId);
         return friendService.getFollowers(userId);
     }
@@ -50,10 +54,11 @@ public class PrivateFriendController {
      */
     @GetMapping("/friends/share")
     public List<EventShortDto> getParticipateEvents(
-            @PathVariable("userId") long userId,
+            @AuthenticationPrincipal Jwt jwt,
             @PositiveOrZero @RequestParam(value = "from", defaultValue = FROM) int from,
             @Positive @RequestParam(value = "size", defaultValue = PAGE_SIZE) int size) {
-        log.debug("Request received GET /users/{}/friends/share?from={}&size={}", userId, from, size);
+        String userId = jwt.getSubject();
+        log.debug("Request received GET /users/friends/share?from={}&size={}", userId, from, size);
         return friendService.getParticipateEvents(userId, from, size);
     }
 
@@ -63,9 +68,10 @@ public class PrivateFriendController {
      */
     @GetMapping("/friends/events")
     public List<EventShortDto> getFriendEvents(
-            @PathVariable("userId") long userId,
+            @AuthenticationPrincipal Jwt jwt,
             @PositiveOrZero @RequestParam(value = "from", defaultValue = FROM) int from,
             @Positive @RequestParam(value = "size", defaultValue = PAGE_SIZE) int size) {
+        String userId = jwt.getSubject();
         log.debug("Request received GET /users/{}/friends/events?from={}&size={}", userId, from, size);
         return friendService.getFriendEvents(userId, from, size);
     }

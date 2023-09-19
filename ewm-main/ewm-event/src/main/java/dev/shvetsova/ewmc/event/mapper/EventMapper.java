@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class EventMapper {
 
     public static Event fromDto(NewEventDto body,
-                                Long userId,
+                                String userId,
                                 Category category,
                                 Location location,
                                 EventState state,

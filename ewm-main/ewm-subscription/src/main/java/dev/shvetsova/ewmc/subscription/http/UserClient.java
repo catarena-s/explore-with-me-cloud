@@ -13,10 +13,10 @@ import java.util.List;
 public interface UserClient extends UserFeignClient {
 
     @GetMapping("/users/{userId}")
-    UserDto findUserById(@PathVariable(value = "userId") long userId);
+    UserDto findUserById(@PathVariable(value = "userId") String userId);
 
     @GetMapping("/users/{userId}/list?ids={ids}")
-    List<UserDto> getUserList(@PathVariable(value = "userId") long userId,
+    List<UserDto> getUserList(@PathVariable(value = "userId") String userId,
                               @RequestParam(value = "ids") List<Long> ids);
 
     @GetMapping("/users/{userId}/check")

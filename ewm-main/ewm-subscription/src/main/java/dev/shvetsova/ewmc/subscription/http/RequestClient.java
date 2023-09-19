@@ -11,7 +11,7 @@ import java.util.List;
 public interface RequestClient {
 
     @GetMapping("/users/{userId}/friends/requests")
-    List<Long> getParticipateEventList(@PathVariable(value = "userId") long userId,
+    List<Long> getParticipateEventList(@PathVariable(value = "userId") String userId,
                                        @RequestParam(value = "friendsId") List<Long> friendsId);
 }
 

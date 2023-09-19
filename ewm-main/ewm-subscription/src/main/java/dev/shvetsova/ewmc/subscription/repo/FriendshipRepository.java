@@ -7,26 +7,29 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
-    void deleteByFollowerIdAndId(long followerId, long friendId);
+    void deleteByFollowerIdAndId(String followerId, Long friendId);
 
-    boolean existsByFollowerIdAndFriendIdAndStateNot(long followerId, long friendId, FriendshipState status);
+    boolean existsByFollowerIdAndFriendIdAndStateNot(String followerId, String friendId, FriendshipState status);
 
-    boolean existsByIdAndFollowerId(long subsId, long followerId);
+    boolean existsByIdAndFollowerId(long subsId, String followerId);
 
     @Query("select f.friendId from Friendship f where f.followerId=:userId")
-    List<Long> findAllFriends(long userId);
+    List<Long> findAllFriends(String userId);
 
     @Query("select f.followerId from Friendship f where f.friendId=:userId")
-    List<Long> findAllFollowers(long userId);
+    List<Long> findAllFollowers(String userId);
 
-    List<Friendship> findAllByFriendIdAndState(long userId, FriendshipState from);
+    List<Friendship> findAllByFriendIdAndState(String userId, FriendshipState from);
 
-    List<Friendship> findAllByFriendId(long userId);
+    List<Friendship> findAllByFriendId(String userId);
 
-    List<Friendship> findAllByFollowerIdAndState(long userId, FriendshipState from);
+    List<Friendship> findAllByFollowerIdAndState(String userId, FriendshipState from);
 
-    List<Friendship> findAllByFollowerId(long userId);
+    List<Friendship> findAllByFollowerId(String userId);
+
+    Optional<Friendship> findAllByFriendIdAndFollowerId(String userId, String followerId);
 }

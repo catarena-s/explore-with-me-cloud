@@ -27,20 +27,20 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationDto getById(long userId, long id) {
+    public NotificationDto getById(String userId, long id) {
         Notification notification = notificationRepository.findByIdAndUserId(id, userId);
         return NotificationMapper.toDto(notification);
     }
 
     @Override
-    public List<NotificationDto> getAllMsg(long userId) {
+    public List<NotificationDto> getAllMsg(String userId) {
         List<Notification> notificationList = notificationRepository.findAllByUserId(userId);
         return notificationList.stream().map(NotificationMapper::toDto).toList();
     }
 
     @Override
     @Transactional
-    public NotificationDto markAsRead(long userId, long id) {
+    public NotificationDto markAsRead(String userId, long id) {
         Notification notification = notificationRepository.findByIdAndUserId(id, userId);
         notification.setRead(true);
         notificationRepository.save(notification);
@@ -49,7 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public List<NotificationDto> markAsReadList(long userId, List<Long> ids) {
+    public List<NotificationDto> markAsReadList(String userId, List<Long> ids) {
         List<Notification> notificationList = notificationRepository.findAllByUserId(userId);
         notificationList.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(notificationList);
@@ -58,13 +58,13 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void deleteById(long userId, long id) {
+    public void deleteById(String userId, long id) {
         notificationRepository.deleteByIdAndUserId(id, userId);
     }
 
     @Override
     @Transactional
-    public void deleteList(long userId, List<Long> ids) {
+    public void deleteList(String userId, List<Long> ids) {
         notificationRepository.deleteByIdInAndUserId(ids, userId);
     }
 }

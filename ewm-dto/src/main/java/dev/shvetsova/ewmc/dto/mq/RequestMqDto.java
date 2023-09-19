@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 public class RequestMqDto {
     private List<Long> request;
-    private long userId;
+    private String userId;
     private long eventId;
     private String newStatus;
 }

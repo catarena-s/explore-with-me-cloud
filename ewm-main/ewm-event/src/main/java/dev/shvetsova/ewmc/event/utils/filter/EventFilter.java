@@ -29,8 +29,8 @@ public class EventFilter {
     private LocalDateTime eventDateAfter;
     private LocalDateTime eventDateBefore;
 
-    private Long initiatorId;
-    private List<Long> initiatorIn;
+    private String initiatorId;
+    private List<String> initiatorIn;
 
     private Boolean paidEq;
     private Integer participantLimitEq;

@@ -1,6 +1,7 @@
 package dev.shvetsova.ewmc.subscription.service.subs;
 
 
+import dev.shvetsova.ewmc.dto.mq.FriendshipRequestMq;
 import dev.shvetsova.ewmc.dto.subs.FriendshipDto;
 import dev.shvetsova.ewmc.dto.subs.FriendshipShortDto;
 
@@ -8,15 +9,16 @@ import java.util.List;
 
 public interface FriendshipService {
 
-    FriendshipDto requestFriendship(long followerId, long userId);
+    FriendshipDto requestFriendship(String followerId, String userId);
 
-    List<FriendshipShortDto> approveFriendship(long userId, List<Long> ids);
+    List<FriendshipShortDto> approveFriendship(String userId, List<Long> ids);
+    void approveFriendship(FriendshipRequestMq requestMq);
 
-    List<FriendshipShortDto> rejectFriendship(long userId, List<Long> ids);
+    List<FriendshipShortDto> rejectFriendship(String userId, List<Long> ids);
 
-    void deleteFriendshipRequest(long followerId, long subsId);
+    void deleteFriendshipRequest(String followerId, Long subsId);
 
-    List<FriendshipShortDto> getFriendshipRequests(long followerId, String filter);
+    List<FriendshipShortDto> getFriendshipRequests(String followerId, String filter);
 
-    List<FriendshipShortDto> getIncomingFriendRequests(long userId, String filter);
+    List<FriendshipShortDto> getIncomingFriendRequests(String userId, String filter);
 }

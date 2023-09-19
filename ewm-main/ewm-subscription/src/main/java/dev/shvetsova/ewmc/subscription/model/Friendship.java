@@ -20,13 +20,11 @@ public class Friendship {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    //    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "follower_id")
-    private long followerId;
+    @Column(name = "user_id")
+    private String followerId;
 
-    //    @ManyToOne(fetch = FetchType.LAZY)
     @Column(name = "friend_id")
-    private long friendId;
+    private String friendId;
 
     @Enumerated(EnumType.STRING)
     private FriendshipState state;

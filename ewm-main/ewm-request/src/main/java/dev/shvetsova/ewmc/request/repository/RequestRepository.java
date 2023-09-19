@@ -11,15 +11,15 @@ import java.util.Optional;
 
 @Repository
 public interface RequestRepository extends JpaRepository<Request, Long> {
-    Optional<Request> findByIdAndRequesterId(long requestId, long userId);
+    Optional<Request> findByIdAndRequesterId(long requestId, String userId);
 
-    List<Request> findAllByRequesterId(long userId);
+    List<Request> findAllByRequesterId(String userId);
 
 //    List<Request> findAllByEvent_InitiatorIdAndEventId(long userId, long eventId);
 
-    boolean existsByEventIdAndRequesterId(long eventId, long userId);
+    boolean existsByEventIdAndRequesterId(long eventId, String userId);
 
-    boolean existsByRequesterId(long userId);
+    boolean existsByRequesterId(String userId);
 
     @Query(value = "select r from Request r where r.id in (:requestIds) and r.status = :name")
     List<Request> findAllByIdInAndStatus(List<Long> requestIds, RequestStatus name);

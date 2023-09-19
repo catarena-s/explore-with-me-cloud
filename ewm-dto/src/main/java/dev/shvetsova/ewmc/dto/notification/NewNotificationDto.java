@@ -7,8 +7,8 @@ import lombok.Data;
 @Data
 @Builder
 public class NewNotificationDto {
-    private Long userId;
-    private Long senderId;
+    private String userId;
+    private String senderId;
     private MessageType messageType;
     private String text;
 }

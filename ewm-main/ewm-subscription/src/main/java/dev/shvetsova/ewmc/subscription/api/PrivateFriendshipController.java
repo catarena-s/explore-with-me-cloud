@@ -6,6 +6,8 @@ import dev.shvetsova.ewmc.subscription.service.subs.FriendshipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/users/{userId}/friendships")
+@RequestMapping(path = "/users/friendships")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -41,10 +43,11 @@ public class PrivateFriendshipController {
     @PostMapping("/{friendId}")
     @ResponseStatus(HttpStatus.CREATED)
     public FriendshipDto requestFriendship(
-            @PathVariable("userId") long followerId,
-            @PathVariable("friendId") long friendId) {
-        log.debug("Request received POST '/users/{}/friendships/{}'", followerId, friendId);
-        return friendshipService.requestFriendship(followerId, friendId);
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable("friendId") String friendId) {
+        String userId = jwt.getSubject();
+        log.debug("Request received POST '/users/{}/friendships/{}'", userId, friendId);
+        return friendshipService.requestFriendship(userId, friendId);
     }
 
     /**
@@ -54,10 +57,11 @@ public class PrivateFriendshipController {
     @DeleteMapping("/{subsId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteFriendshipRequest(
-            @PathVariable("userId") long followerId,
-            @PathVariable("subsId") long subsId) {
-        log.debug("Request received DELETE /users/{}/friendships/{}", followerId, subsId);
-        friendshipService.deleteFriendshipRequest(followerId, subsId);
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable("subsId") Long subsId) {
+        String userId = jwt.getSubject();
+        log.debug("Request received DELETE /users/{}/friendships/{}", userId, subsId);
+        friendshipService.deleteFriendshipRequest(userId, subsId);
     }
 
     /**
@@ -67,10 +71,11 @@ public class PrivateFriendshipController {
      */
     @PatchMapping("/approve")
     public List<FriendshipShortDto> approveFriendship(
-            @PathVariable("userId") long followerId,
+            @AuthenticationPrincipal Jwt jwt,
             @RequestParam(value = "ids") List<Long> ids) {
-        log.debug("Request received PATCH '/users/{}/friendships/approve?ids={}'", followerId, ids);
-        return friendshipService.approveFriendship(followerId, ids);
+        String userId = jwt.getSubject();
+        log.debug("Request received PATCH '/users/{}/friendships/approve?ids={}'", userId, ids);
+        return friendshipService.approveFriendship(userId, ids);
     }
 
     /**
@@ -80,10 +85,11 @@ public class PrivateFriendshipController {
      */
     @PatchMapping("/reject")
     public List<FriendshipShortDto> rejectFriendship(
-            @PathVariable("userId") long followerId,
+            @AuthenticationPrincipal Jwt jwt,
             @RequestParam(value = "ids") List<Long> ids) {
-        log.debug("Request received PATCH '/users/{}/friendships/reject?ids={}'", followerId, ids);
-        return friendshipService.rejectFriendship(followerId, ids);
+        String userId = jwt.getSubject();
+        log.debug("Request received PATCH '/users/{}/friendships/reject?ids={}'", userId, ids);
+        return friendshipService.rejectFriendship(userId, ids);
     }
 
     /**
@@ -93,11 +99,12 @@ public class PrivateFriendshipController {
      */
     @GetMapping("/requests")
     public List<FriendshipShortDto> getFriendshipRequests(
-            @PathVariable("userId") long followerId,
+            @AuthenticationPrincipal Jwt jwt,
             @RequestParam(value = "filter", defaultValue = "ALL") String filter
     ) {
-        log.debug("Request received POST /users/{}/friendships?filter={}", followerId, filter);
-        return friendshipService.getFriendshipRequests(followerId, filter);
+        String userId = jwt.getSubject();
+        log.debug("Request received POST /users/{}/friendships?filter={}", userId, filter);
+        return friendshipService.getFriendshipRequests(userId, filter);
     }
 
     /**
@@ -107,9 +114,10 @@ public class PrivateFriendshipController {
      */
     @GetMapping("/followers")
     public List<FriendshipShortDto> getIncomingFriendRequests(
-            @PathVariable("userId") long userId,
+            @AuthenticationPrincipal Jwt jwt,
             @RequestParam(value = "filter", defaultValue = "ALL") String filter
     ) {
+        String userId = jwt.getSubject();
         log.debug("Request received POST /users/{}/followers?filter={}", userId, filter);
         return friendshipService.getIncomingFriendRequests(userId, filter);
     }

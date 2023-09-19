@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class ParticipationRequestDto {
     private Long id;
     private Long event;
-    private Long requester;
+    private String  requester;
     private String created;
     private String status;
     private boolean isPrivate;

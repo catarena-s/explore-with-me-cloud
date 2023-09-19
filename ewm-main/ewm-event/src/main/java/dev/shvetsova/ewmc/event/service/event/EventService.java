@@ -2,7 +2,6 @@ package dev.shvetsova.ewmc.event.service.event;
 
 import dev.shvetsova.ewmc.dto.event.*;
 import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateRequest;
-import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateResult;
 import dev.shvetsova.ewmc.event.enums.SortType;
 import dev.shvetsova.ewmc.event.model.Event;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,18 +15,19 @@ public interface EventService {
      * @param body
      * @return
      */
-    EventFullDto saveEvent(long userId, NewEventDto body);
+    EventFullDto saveEvent(String userId, NewEventDto body);
 
     /**
+     * @param userId
      * @param eventId
      * @return
      */
 
-    EventFullDto getEventById(long eventId);
+    EventFullDto getEventById(String userId, long eventId);
 
-    EventFullDto updateEventByUser(UpdateEventUserRequest body, long userId, long eventId);
+    EventFullDto updateEventByUser(UpdateEventUserRequest body, String userId, long eventId);
 
-    List<EventShortDto> getPublishedEvents(long userId, int from, int size);
+    List<EventShortDto> getPublishedEvents(String userId, int from, int size);
 
     /**
      * Поиск событий
@@ -42,7 +42,7 @@ public interface EventService {
      * @return возвращает полную информацию обо всех событиях подходящих под переданные условия
      * - если по заданным фильтрам не найдено ни одного события, возвращает пустой список
      */
-    List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
+    List<EventFullDto> getEventsByAdmin(List<String> users, List<String> states, List<Long> categories,
                                         LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size);
 
     /**
@@ -55,16 +55,8 @@ public interface EventService {
     /**
      * Получение событий с возможностью фильтрации
      *
-     * @param text          текст для поиска в содержимом аннотации и подробном описании события
-     * @param categories    список идентификаторов категорий в которых будет вестись поиск
-     * @param paid          поиск только платных/бесплатных событий
-     * @param rangeStart    дата и время не раньше которых должно произойти событие
-     * @param rangeEnd      дата и время не позже которых должно произойти событие
-     * @param onlyAvailable только события у которых не исчерпан лимит запросов на участие
-     * @param sort          Вариант сортировки: по дате события или по количеству просмотров
-     * @param from          количество событий, которые нужно пропустить для формирования текущего набора default: 0
-     * @param size          количество событий в наборе
-     * @param request
+     * @param text       текст для поиска в содержимом аннотации и подробном описании события
+     * @param categories список идентификаторов категорий в которых будет вестись поиск
      * @return если по заданным фильтрам не найдено ни одного события, возвращает пустой список
      */
     List<EventShortDto> getPublishedEvents(String text, List<Long> categories, Boolean paid,
@@ -89,13 +81,13 @@ public interface EventService {
 
     List<EventShortDto> findEventsByIds(List<Long> eventIdList);
 
-    boolean isExistByInitiator(long userId);
+    boolean isExistByInitiator(String userId);
 
-    List<EventShortDto> getPublishedEvents(long userId, List<Long> friendsId);
+    List<EventShortDto> getPublishedEvents(List<Long> friendsId);
 
     List<EventShortDto> getParticipateEventList(long userId, List<Long> friendsId);
 
-    void upConfirmedRequests(long userId, long eventId);
+    void upConfirmedRequests(String userId, long eventId);
 
-    void changeRequestStatus(EventRequestStatusUpdateRequest body, long userId, long eventId);
+    void changeRequestStatus(EventRequestStatusUpdateRequest body, String userId, long eventId);
 }

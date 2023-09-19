@@ -13,13 +13,15 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/users/{userId}/events")
+@RequestMapping(path = "/users/events")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -29,50 +31,55 @@ public class PrivateEventController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto saveEvent(@Valid @RequestBody NewEventDto body,
-                                  @PathVariable long userId) {
+                                  @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         log.debug("Request received POST /users/{}/events : {}", userId, body);
         return eventService.saveEvent(userId, body);
     }
 
     @GetMapping("/{eventId}")
-    public EventFullDto getEvent(@PathVariable(value = "userId") long userId,
-                                 @PathVariable(value = "eventId") long eventId) {
+    public EventFullDto getEvent(@PathVariable(value = "eventId") long eventId,
+                                 @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         log.debug("Request received GET /users/{}/events/{}", userId, eventId);
-        return eventService.getEventById(eventId);
+        return eventService.getEventById(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")
     public EventFullDto updateEventByUser(@Valid @RequestBody UpdateEventUserRequest body,
-                                          @PathVariable(value = "userId") long userId,
-                                          @PathVariable(value = "eventId") long eventId) {
+                                          @PathVariable(value = "eventId") long eventId,
+                                          @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         log.debug("Request received PATCH /users/{}/events/{} : {}", userId, eventId, body);
         return eventService.updateEventByUser(body, userId, eventId);
     }
 
     @GetMapping
-    public List<EventShortDto> getEvents(@PathVariable(value = "userId") long userId,
-                                         @PositiveOrZero @RequestParam(value = "from", defaultValue = Constants.FROM) int from,
-                                         @Positive @RequestParam(value = "size", defaultValue = Constants.PAGE_SIZE) int size) {
+    public List<EventShortDto> getEvents(@PositiveOrZero @RequestParam(value = "from", defaultValue = Constants.FROM) int from,
+                                         @Positive @RequestParam(value = "size", defaultValue = Constants.PAGE_SIZE) int size,
+                                         @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         log.debug("Request received GET /users/{}/events?from={}&size={}", userId, from, size);
         return eventService.getPublishedEvents(userId, from, size);
     }
 
     @GetMapping("/check")
-    public boolean checkEvents(@PathVariable(value = "userId") long userId) {
+    public boolean checkEvents(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         log.debug("Request received GET /users/{}/events", userId);
         return eventService.isExistByInitiator(userId);
     }
 
     @GetMapping("/fiends")
-    public List<EventShortDto> getEventList(@PathVariable(value = "userId") long userId,
-                                            @RequestParam(value = "friendsId") List<Long> friendsId) {
-        log.debug("Request received GET /users/{}/events", userId);
-        return eventService.getPublishedEvents(userId, friendsId);
+    public List<EventShortDto> getEventList(@RequestParam(value = "friendsId") List<Long> friendsId,
+                                            @AuthenticationPrincipal Jwt jwt) {
+        return eventService.getPublishedEvents(friendsId);
     }
 
     @GetMapping("/up/{id}")
-    public boolean upConfirmedRequests(@PathVariable(value = "userId") long userId,
-                                       @PathVariable(value = "id") long id) {
+    public boolean upConfirmedRequests(@PathVariable(value = "id") long id,
+                                       @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         log.debug("Request received GET /users/{}/events", userId);
         eventService.upConfirmedRequests(userId, id);
         return true;
@@ -80,8 +87,9 @@ public class PrivateEventController {
 
     @PatchMapping("/{eventId}/requests")
     public void changeRequestStatus(@RequestBody EventRequestStatusUpdateRequest body,
-                                    @PathVariable(value = "userId") long userId,
-                                    @PathVariable(value = "eventId") long eventId) {
+                                    @PathVariable(value = "eventId") long eventId,
+                                    @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         log.debug("Request received PATCH /users/{}/events/{}/requests : {}", userId, eventId, body);
         eventService.changeRequestStatus(body, userId, eventId);
     }

@@ -10,7 +10,6 @@ import dev.shvetsova.ewmc.event.enums.EventState;
 import dev.shvetsova.ewmc.event.enums.EventStateAction;
 import dev.shvetsova.ewmc.event.enums.SortType;
 import dev.shvetsova.ewmc.event.http.RequestClient;
-import dev.shvetsova.ewmc.event.http.UserClient;
 import dev.shvetsova.ewmc.event.mapper.EventMapper;
 import dev.shvetsova.ewmc.event.model.Category;
 import dev.shvetsova.ewmc.event.model.Event;
@@ -39,7 +38,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.utils.UsersUtil.checkExistUser;
 import static java.lang.Boolean.FALSE;
 
 @Service
@@ -48,7 +46,6 @@ public class EventServiceImpl implements EventService {
     private static final String EVENT_DATE_AND_TIME_IS_BEFORE = "Event date and time cannot be earlier than %d hours from the";
     private final EventRepository eventRepository;
 
-    private final UserClient userClient;
     private final RequestClient requestClient;
 
     private final CategoryService categoryService;
@@ -60,10 +57,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventFullDto saveEvent(long userId, NewEventDto body) {
+    public EventFullDto saveEvent(String userId, NewEventDto body) {
 //        дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента
         confirmEventDateIsAfterCurrent(body.getEventDate(), 2);
-        checkExistUser(userClient, userId);
         final Category category = categoryService.findCategoryById(body.getCategory());
         final Location location = locationService.findLocation(body.getLocation());
 
@@ -74,8 +70,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getPublishedEvents(long userId, int from, int size) {
-        checkExistUser(userClient, userId);
+    public List<EventShortDto> getPublishedEvents(String userId, int from, int size) {
         final PageRequest page = PageRequest.of(from / size, size);
         final List<Event> events = eventRepository.findAllByInitiatorId(userId, page).getContent();
         return events.stream()
@@ -84,7 +79,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getEventById(long eventId) {
+    public EventFullDto getEventById(String userId, long eventId) {
         final Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format(Constants.EVENT_WITH_ID_D_WAS_NOT_FOUND, eventId),
@@ -93,7 +88,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
+    public List<EventFullDto> getEventsByAdmin(List<String> users, List<String> states, List<Long> categories,
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Integer from, Integer size) {
 
@@ -179,8 +174,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     //Изменение события добавленного текущим пользователем privet api
-    public EventFullDto updateEventByUser(UpdateEventUserRequest body, long userId, long eventId) {
-        userClient.checkExistById(userId);
+    public EventFullDto updateEventByUser(UpdateEventUserRequest body, String userId, long eventId) {
         final Event event = getEventForUser(userId, eventId);
 
         if (event.getState().equals(EventState.PUBLISHED)) {
@@ -205,8 +199,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getPublishedEvents(long userId, List<Long> friendsId) {
-        userClient.checkExistById(userId);
+    public List<EventShortDto> getPublishedEvents(List<Long> friendsId) {
         final List<Event> events = eventRepository.findAllByInitiatorIdInAndState(friendsId, EventState.PUBLISHED);
         return events.isEmpty()
                 ? Collections.emptyList()
@@ -215,8 +208,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getParticipateEventList(long userId, List<Long> friendsId) {
-        userClient.checkExistById(userId);
-        List<Long> eventList = requestClient.getParticipateEventList(userId, friendsId);
+        List<Long> eventList = requestClient.getParticipateEventList(friendsId);
         final List<Event> events = eventRepository.findAllByIdInAndState(eventList, EventState.PUBLISHED);
         return events.isEmpty()
                 ? Collections.emptyList()
@@ -225,8 +217,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public void upConfirmedRequests(long userId, long eventId) {
-        userClient.checkExistById(userId);
+    public void upConfirmedRequests(String userId, long eventId) {
         final Event event = eventRepository.findById(eventId).orElseThrow(
                 () -> new NotFoundException(String.format(Constants.EVENT_WITH_ID_D_WAS_NOT_FOUND, eventId),
                         Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND)
@@ -237,8 +228,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public void changeRequestStatus(EventRequestStatusUpdateRequest body, long userId, long eventId) {
-        userClient.checkExistById(userId);
+    public void changeRequestStatus(EventRequestStatusUpdateRequest body, String userId, long eventId) {
         final Event event = eventRepository.findById(eventId).orElseThrow(
                 () -> new NotFoundException(String.format(Constants.EVENT_WITH_ID_D_WAS_NOT_FOUND, eventId),
                         Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND)
@@ -351,7 +341,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public boolean isExistByInitiator(long userId) {
+    public boolean isExistByInitiator(String userId) {
         return eventRepository.existsByInitiatorId(userId);
     }
 
@@ -432,7 +422,7 @@ public class EventServiceImpl implements EventService {
     /**
      * Получить событие пользователя
      */
-    private Event getEventForUser(long userId, long eventId) {
+    private Event getEventForUser(String userId, long eventId) {
         return eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format(Constants.EVENT_WITH_ID_D_WAS_NOT_FOUND, eventId),

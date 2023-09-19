@@ -37,7 +37,7 @@ public class Event {
     private Category category;
 
     @Column(name = "initiator_id")
-    private long initiatorId;
+    private String  initiatorId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")

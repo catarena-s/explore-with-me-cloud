@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class FriendshipDto {
     private Long id;
-    private Long followerId;
+    private String followerId;
     private UserShortDto friend;
     private String  state;
 }

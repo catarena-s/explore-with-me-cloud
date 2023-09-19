@@ -19,12 +19,10 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-    //    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "requester_id")
-    @Column(name = "requester_id")
-    private long requesterId;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "requester_id")
+    private String requesterId;
+
     @Column(name = "event_id")
     private long eventId;
 

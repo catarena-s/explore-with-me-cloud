@@ -28,7 +28,7 @@ public class AdminEventController {
     @GetMapping
     public List<EventFullDto> getEventsByAdmin(
             //список id пользователей, чьи события нужно найти
-            @RequestParam(value = "users", required = false) List<Long> users,
+            @RequestParam(value = "users", required = false) List<String> users,
             //список состояний в которых находятся искомые события
             @RequestParam(value = "states", required = false) List<String> states,
             //список id категорий в которых будет вестись поиск
