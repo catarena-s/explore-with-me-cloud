@@ -1,7 +1,5 @@
-package dev.shvetsova.ewmc.request.api.privat;
+package dev.shvetsova.ewmc.request.api;
 
-import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateRequest;
-import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateResult;
 import dev.shvetsova.ewmc.dto.request.ParticipationRequestDto;
 import dev.shvetsova.ewmc.request.service.request.RequestService;
 import lombok.RequiredArgsConstructor;
@@ -25,14 +23,6 @@ public class PrivateRequestController {
         log.debug("Request received GET /users/{}/requests?eventId={}", userId, eventId);
         return requestService.addParticipationRequest(userId, eventId);
     }
-
-//    @PatchMapping("/events/{eventId}/requests")
-//    public EventRequestStatusUpdateResult changeRequestStatus(@RequestBody EventRequestStatusUpdateRequest body,
-//                                                              @PathVariable(value = "userId") long userId,
-//                                                              @PathVariable(value = "eventId") long eventId) {
-//        log.debug("Request received PATCH /users/{}/events/{}/requests : {}", userId, eventId, body);
-//        return requestService.changeRequestStatus(body, userId, eventId);
-//    }
 
     @GetMapping("/events/{eventId}/requests")
     public List<ParticipationRequestDto> getEventParticipants(
