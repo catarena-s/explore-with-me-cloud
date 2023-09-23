@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class UserMapper {
     public static UserDto toDto(User user) {
         return UserDto.builder()
-                .id(user.getId())
+                .id(user.getUid())
                 .name(user.getName())
                 .email(user.getEmail())
                 .isAutoSubscribe(user.isAutoSubscribe())
@@ -23,11 +23,12 @@ public class UserMapper {
         return fiends.stream().map(UserMapper::toDto).collect(Collectors.toList());
     }
 
-    public static User fromDto(NewUserRequest body) {
+    public static User fromDto(NewUserRequest body, String uid) {
         return User.builder()
                 .name(body.getName())
                 .email(body.getEmail())
                 .autoSubscribe(false)
+                .uid(uid)
                 .build();
     }
 }

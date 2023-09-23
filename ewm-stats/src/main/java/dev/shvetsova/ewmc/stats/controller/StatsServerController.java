@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +21,6 @@ import java.util.stream.Collectors;
 import static dev.shvetsova.ewmc.utils.Constants.*;
 
 @RestController
-@RequestMapping(path = "/")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -28,7 +29,7 @@ public class StatsServerController {
 
     @PostMapping(HIT_ENDPOINT)
     @ResponseStatus(HttpStatus.CREATED)
-    public void saveHit(@Valid @RequestBody EndpointHitDto dto) {
+    public void saveHit(@Valid @RequestBody EndpointHitDto dto, @AuthenticationPrincipal Jwt jwt) {
         log.debug("Request received POST '{}' : {}", HIT_ENDPOINT, dto);
         statsService.saveHit(dto);
     }

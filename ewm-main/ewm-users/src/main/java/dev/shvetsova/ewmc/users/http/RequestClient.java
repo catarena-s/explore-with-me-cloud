@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "ewm-request")
 public interface RequestClient {
-    @GetMapping("users/{userId}/requests/check")
-    Boolean checkRequests(@PathVariable long userId);
+    @GetMapping("users/requests/check/{userId}")
+    Boolean checkRequests(@PathVariable String userId);
 }
 

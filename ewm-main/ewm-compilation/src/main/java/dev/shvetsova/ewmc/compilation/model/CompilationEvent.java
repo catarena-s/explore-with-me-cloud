@@ -17,22 +17,4 @@ import lombok.NoArgsConstructor;
 public class CompilationEvent {
     @EmbeddedId
     private CompilationEventKey id;
-
-//    @ManyToOne
-////    @MapsId("id")
-//    @JoinColumn(name = "compilation_id")
-//    Compilation compilationId;
-
-    //    @ManyToOne
-//    @MapsId("event_id")
-//    @JoinColumn
-//    @Column(name = "event_id")
-//    Long eventId;
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "compilation_id")
-//    private Compilation compilation;
-//
-//    @Column(name = "event_id")
-//    private Long eventId;
 }

@@ -1,4 +1,4 @@
-package dev.shvetsova.ewmc.compilation.service;
+package dev.shvetsova.ewmc.compilation.service.compilation;
 
 import dev.shvetsova.ewmc.compilation.http.EventClient;
 import dev.shvetsova.ewmc.compilation.mapper.CompilationMapper;

@@ -24,6 +24,8 @@ public class User {
     private String email;
     @Column
     private String name;
+    @Column
+    private String uid;
     @Column(name = "auto_subscribe")
     private boolean autoSubscribe;
 }

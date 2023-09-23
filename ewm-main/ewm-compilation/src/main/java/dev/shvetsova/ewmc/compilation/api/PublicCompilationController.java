@@ -1,6 +1,6 @@
 package dev.shvetsova.ewmc.compilation.api;
 
-import dev.shvetsova.ewmc.compilation.service.CompilationService;
+import dev.shvetsova.ewmc.compilation.service.compilation.CompilationService;
 import dev.shvetsova.ewmc.dto.compilation.CompilationDto;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;

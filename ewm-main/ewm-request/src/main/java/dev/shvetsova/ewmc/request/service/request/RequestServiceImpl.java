@@ -1,6 +1,5 @@
 package dev.shvetsova.ewmc.request.service.request;
 
-import dev.shvetsova.ewmc.dto.event.EventFullDto;
 import dev.shvetsova.ewmc.dto.mq.RequestMqDto;
 import dev.shvetsova.ewmc.dto.notification.NewNotificationDto;
 import dev.shvetsova.ewmc.dto.request.ParticipationRequestDto;
@@ -8,7 +7,6 @@ import dev.shvetsova.ewmc.enums.MessageType;
 import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.request.http.EventClient;
-import dev.shvetsova.ewmc.request.http.UserClient;
 import dev.shvetsova.ewmc.request.mapper.RequestMapper;
 import dev.shvetsova.ewmc.request.model.Request;
 import dev.shvetsova.ewmc.request.model.RequestStatus;
@@ -30,7 +28,6 @@ import static dev.shvetsova.ewmc.utils.Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOU
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
 
-    private final UserClient userClient;
     private final EventClient eventClient;
 
     private final NotificationSupplier notificationSupplier;

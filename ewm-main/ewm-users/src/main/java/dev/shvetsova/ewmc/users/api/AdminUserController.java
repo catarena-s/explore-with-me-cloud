@@ -24,6 +24,7 @@ import static dev.shvetsova.ewmc.utils.Constants.PAGE_SIZE;
 @Slf4j
 @Validated
 public class AdminUserController {
+
     private final UserService userService;
 
     @PostMapping
@@ -34,7 +35,7 @@ public class AdminUserController {
     }
 
     @GetMapping
-    public List<UserDto> getUsers(@RequestParam(value = "ids", required = false) List<Long> ids,
+    public List<UserDto> getUsers(@RequestParam(value = "ids", required = false) List<String> ids,
                                   @PositiveOrZero
                                   @RequestParam(value = "from", defaultValue = FROM) Integer from,
                                   @Positive
@@ -51,7 +52,7 @@ public class AdminUserController {
 
     @DeleteMapping("/{userId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable(value = "userId") long userId) {
+    public void delete(@PathVariable(value = "userId") String userId) {
         log.debug("Request received DELETE /admin/users{}", userId);
         userService.delete(userId);
     }

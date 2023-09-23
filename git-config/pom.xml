@@ -11,10 +11,13 @@
     <groupId>dev.shvetsova.ewmc</groupId>
     <artifactId>git-config</artifactId>
     <version>0.0.1</version>
-    <name>ewm-config</name>
-    <description>ewm-config</description>
+    <packaging>jar</packaging>
+    <name>git-config</name>
+    <description>git-config</description>
     <properties>
         <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
     </properties>
     <dependencies>

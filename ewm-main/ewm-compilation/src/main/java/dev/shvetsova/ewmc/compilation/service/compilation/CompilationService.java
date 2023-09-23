@@ -1,4 +1,4 @@
-package dev.shvetsova.ewmc.compilation.service;
+package dev.shvetsova.ewmc.compilation.service.compilation;
 
 import dev.shvetsova.ewmc.dto.compilation.CompilationDto;
 import dev.shvetsova.ewmc.dto.compilation.NewCompilationDto;

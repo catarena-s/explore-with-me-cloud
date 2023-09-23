@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "ewm-event")
 public interface EventClient {
-    @GetMapping("users/{userId}/events/check")
-    Boolean checkEvents(@PathVariable long userId);
+    @GetMapping("users/events/check/{userId}")
+    Boolean checkEvents(@PathVariable String userId);
 }
 

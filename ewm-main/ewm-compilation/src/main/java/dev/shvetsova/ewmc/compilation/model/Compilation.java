@@ -24,7 +24,4 @@ public class Compilation {
     private String title;
     @Column
     private Boolean pinned;
-
-//    @OneToMany(mappedBy = "compilation", fetch = FetchType.LAZY)
-//    private List<CompilationEvent> compilationEvents;
 }

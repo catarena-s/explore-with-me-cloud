@@ -1,10 +1,10 @@
 package dev.shvetsova.ewmc.event.utils.filter;
 
 import com.querydsl.core.types.Predicate;
+import dev.shvetsova.ewmc.event.model.QEvent;
 import dev.shvetsova.ewmc.event.utils.QPredicate;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import dev.shvetsova.ewmc.event.model.QEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventPredicate {
@@ -25,8 +25,8 @@ public class EventPredicate {
                 .add(filter.getDescription(), QEvent.event.description::likeIgnoreCase)
                 .add(filter.getAnnotation(), QEvent.event.annotation::likeIgnoreCase)
                 .add(filter.getPaidEq(), QEvent.event.paid::eq)
-//                .add(filter.getInitiatorId(), QEvent.event.initiatorId::eq)
-//                .add(filter.getInitiatorIn(), QEvent.event.initiatorId::in)
+                .add(filter.getInitiatorId(), QEvent.event.initiatorId::eq)
+                .add(filter.getInitiatorIn(), QEvent.event.initiatorId::in)
                 .add(filter.getCategoryId(), QEvent.event.category.id::eq)
                 .add(filter.getCategoryIn(), QEvent.event.category.id::in)
                 .add(filter.getEventDateAfter(), QEvent.event.eventDate::after)

@@ -16,7 +16,7 @@ import java.util.List;
 
 import static dev.shvetsova.ewmc.utils.Constants.*;
 
-@FeignClient(name = "ewm-stats")
+@FeignClient(name = "ewm-stats",url = "http://localhost:8765/ewm-stats/")
 public interface StatsClient {
     @PostMapping(HIT_ENDPOINT)
     ResponseEntity<Object> saveHit(@Valid @RequestBody EndpointHitDto dto);

@@ -1,4 +1,4 @@
-package dev.shvetsova.ewmc.event.security;
+package dev.shvetsova.ewmc.stats.security;
 
 import dev.shvetsova.ewmc.utils.converter.KCRoleConverter;
 import org.springframework.context.annotation.Bean;
@@ -22,9 +22,9 @@ public class SecurityConfig {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KCRoleConverter());
 
         http
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/users/*").hasRole("user"))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/admin/*").hasRole("admin"))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+//                .authorizeHttpRequests(auth -> auth.anyRequest().hasRole("feign"))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+        ;
         http.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer
                 .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter)));
 

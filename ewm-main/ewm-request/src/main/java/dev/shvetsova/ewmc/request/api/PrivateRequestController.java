@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/users/{userId}")
+@RequestMapping(path = "/users")
 @RequiredArgsConstructor
 @Slf4j
 public class PrivateRequestController {
@@ -20,9 +20,9 @@ public class PrivateRequestController {
 
     @PostMapping("/requests")
     @ResponseStatus(HttpStatus.CREATED)
-    public ParticipationRequestDto addParticipationRequest(@PathVariable(value = "userId") long uId,
-                                                           @RequestParam(value = "eventId") long eventId,
-                                                           @AuthenticationPrincipal Jwt jwt) {
+    public ParticipationRequestDto addParticipationRequest(
+            @RequestParam(value = "eventId") long eventId,
+            @AuthenticationPrincipal Jwt jwt) {
         final String userId = jwt.getSubject();
         log.debug("Request received GET /users/{}/requests?eventId={}", userId, eventId);
         return requestService.addParticipationRequest(userId, eventId);
@@ -30,7 +30,6 @@ public class PrivateRequestController {
 
     @GetMapping("/events/{eventId}/requests")
     public List<ParticipationRequestDto> getEventParticipants(
-            @PathVariable(value = "userId") long uId,
             @PathVariable(value = "eventId") long eventId,
             @AuthenticationPrincipal Jwt jwt) {
         final String userId = jwt.getSubject();
@@ -39,26 +38,26 @@ public class PrivateRequestController {
     }
 
     @GetMapping("/requests")
-    public List<ParticipationRequestDto> getUserRequests(@PathVariable(value = "userId") long uId,
-                                                         @AuthenticationPrincipal Jwt jwt) {
+    public List<ParticipationRequestDto> getUserRequests(
+            @AuthenticationPrincipal Jwt jwt) {
         final String userId = jwt.getSubject();
         log.debug("Request received GET /users/{}/requests", userId);
         return requestService.getUserRequests(userId);
     }
 
     @GetMapping("/friends/requests")
-    public List<Long> getFriendsRequests(@PathVariable(value = "userId") long uId,
-                                         @RequestParam(value = "friendsId") List<Long> friendsId,
-                                         @AuthenticationPrincipal Jwt jwt) {
+    public List<Long> getFriendsRequests(
+            @RequestParam(value = "friendsId") List<Long> friendsId,
+            @AuthenticationPrincipal Jwt jwt) {
         final String userId = jwt.getSubject();
         log.debug("Request received GET /users/{}/friends/requests", userId);
         return requestService.getFriendsEventRequests(userId, friendsId);
     }
 
     @PatchMapping("/requests/{requestId}/cancel")
-    public ParticipationRequestDto cancelRequest(@PathVariable(value = "userId") long uId,
-                                                 @PathVariable(value = "requestId") long requestId,
-                                                 @AuthenticationPrincipal Jwt jwt) {
+    public ParticipationRequestDto cancelRequest(
+            @PathVariable(value = "requestId") long requestId,
+            @AuthenticationPrincipal Jwt jwt) {
         final String userId = jwt.getSubject();
         log.debug("Request received GET /users/{}/requests/{}/cancel", userId, requestId);
         return requestService.cancelRequest(userId, requestId);
@@ -71,7 +70,6 @@ public class PrivateRequestController {
      */
     @PatchMapping("/requests/hide")
     public List<ParticipationRequestDto> hideParticipation(
-            @PathVariable(value = "userId") long uId,
             @RequestParam(value = "ids") List<Long> ids,
             @AuthenticationPrincipal Jwt jwt) {
         final String userId = jwt.getSubject();
@@ -86,7 +84,6 @@ public class PrivateRequestController {
      */
     @PatchMapping("/requests/show")
     public List<ParticipationRequestDto> showParticipation(
-            @PathVariable(value = "userId") long uId,
             @RequestParam(value = "ids") List<Long> ids,
             @AuthenticationPrincipal Jwt jwt) {
         final String userId = jwt.getSubject();
@@ -94,11 +91,12 @@ public class PrivateRequestController {
         return requestService.changeVisibilityEventParticipation(userId, ids, false);
     }
 
-    @GetMapping("/requests/check")
-    public boolean checkRequest(@PathVariable(value = "userId") long uId,
-                                @AuthenticationPrincipal Jwt jwt) {
-        final String userId = jwt.getSubject();
-        log.debug("Request received GET /users/{}/events", userId);
-        return requestService.isExistByRequester(userId);
+    @GetMapping("/requests/check/{userId}")
+    public boolean checkRequest(
+            @PathVariable(value = "userId") String uId,
+            @AuthenticationPrincipal Jwt jwt) {
+//        final String userId = jwt.getSubject();
+        log.debug("Request received GET /users/{}/events", uId);
+        return requestService.isExistByRequester(uId);
     }
 }

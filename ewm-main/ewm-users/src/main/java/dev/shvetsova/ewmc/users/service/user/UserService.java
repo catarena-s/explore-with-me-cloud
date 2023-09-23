@@ -28,23 +28,20 @@ public interface UserService {
      * @param size количество элементов в наборе default: 10
      * @return
      */
-    List<UserDto> getUsers(List<Long> ids, Integer from, Integer size);
+    List<UserDto> getUsers(List<String> ids, Integer from, Integer size);
 
     /**
      * Удаление пользователя
      *
      * @param userId
      */
-    void delete(long userId);
+    void delete(String userId);
 
-//    void checkExistById(long userId);
+//    UserDto getUserById(String userId);
 
-    //    User findUserById(long userId);
-    UserDto getUserById(long userId);
+    UserDto changeSubscribeMode(String userId, boolean isAutoSubscribe);
 
-    UserDto changeSubscribeMode(long userId, boolean isAutoSubscribe);
+//    boolean isExistUser(String userId);
 
-    boolean isExistUser(long userId);
-
-    List<UserDto> getUsersList(long id, List<Long> userId);
+    List<UserDto> getUsersList(List<String> userId);
 }

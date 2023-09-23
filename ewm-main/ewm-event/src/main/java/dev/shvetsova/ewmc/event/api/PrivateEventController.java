@@ -63,11 +63,13 @@ public class PrivateEventController {
         return eventService.getPublishedEvents(userId, from, size);
     }
 
-    @GetMapping("/check")
-    public boolean checkEvents(@AuthenticationPrincipal Jwt jwt) {
-        String userId = jwt.getSubject();
-        log.debug("Request received GET /users/{}/events", userId);
-        return eventService.isExistByInitiator(userId);
+    @GetMapping("/check/{userId}")
+    public boolean checkEvents(
+            @PathVariable(value = "userId") String uId,
+            @AuthenticationPrincipal Jwt jwt) {
+//        String userId = jwt.getSubject();
+        log.debug("Request received GET /users/{}/events", uId);
+        return eventService.isExistByInitiator(uId);
     }
 
     @GetMapping("/fiends")

@@ -20,24 +20,11 @@
         <module>ewm-stats</module>
         <module>ewm-dto</module>
         <module>ewm-utils</module>
+        <module>ewm-main</module>
     </modules>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>dev.shvetsova.ewmc</groupId>
-            <artifactId>ewm-dto</artifactId>
-            <version>0.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.shvetsova.ewmc</groupId>
-            <artifactId>ewm-utils</artifactId>
-            <version>0.0.1</version>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
 </project>

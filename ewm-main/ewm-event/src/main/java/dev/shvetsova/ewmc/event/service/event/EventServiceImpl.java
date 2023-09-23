@@ -103,7 +103,7 @@ public class EventServiceImpl implements EventService {
                 .eventDateBefore(rangeEnd)
                 .statesIn(stateList)
                 .build();
-        final Predicate predicate = EventPredicate.getAndEventPredicate(filter);
+        final Predicate predicate = null;// EventPredicate.getAndEventPredicate(filter);
 
         final List<Event> events = (predicate == null)
                 ? eventRepository.findAll(page).getContent()
