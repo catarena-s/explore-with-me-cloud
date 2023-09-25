@@ -3,7 +3,6 @@ package dev.shvetsova.ewmc.request.http;
 import dev.shvetsova.ewmc.dto.event.EventFullDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "ewm-event")

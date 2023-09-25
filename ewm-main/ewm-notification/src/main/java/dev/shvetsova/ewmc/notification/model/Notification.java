@@ -1,6 +1,6 @@
 package dev.shvetsova.ewmc.notification.model;
 
-import dev.shvetsova.ewmc.enums.MessageType;
+import dev.shvetsova.ewmc.enums.SenderType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,5 +33,5 @@ public class Notification {
     private LocalDateTime created;
     @Column(name = "sender_type")
     @Enumerated(EnumType.STRING)
-    private MessageType messageType;
+    private SenderType senderType;
 }

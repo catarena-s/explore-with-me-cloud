@@ -1,15 +1,40 @@
 package dev.shvetsova.ewmc.dto.mq;
 
-import lombok.Builder;
-import lombok.Getter;
-
-import java.util.List;
-
-@Builder
-@Getter
 public class RequestMqDto {
-    private List<Long> request;
-    private long userId;
-    private long eventId;
-    private String newStatus;
+    private Long requestId;
+    private Long eventId;
+    private Long userId;
+
+    public RequestMqDto() {
+    }
+
+    public RequestMqDto(Long requestId, Long eventId, Long userId) {
+        this.requestId = requestId;
+        this.eventId = eventId;
+        this.userId = userId;
+    }
+
+    public Long getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(Long requestId) {
+        this.requestId = requestId;
+    }
+
+    public Long getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 }

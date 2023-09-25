@@ -5,7 +5,10 @@ import dev.shvetsova.ewmc.dto.event.*;
 import dev.shvetsova.ewmc.dto.location.LocationDto;
 import dev.shvetsova.ewmc.dto.mq.EventInfoMq;
 import dev.shvetsova.ewmc.dto.mq.RequestMqDto;
+import dev.shvetsova.ewmc.dto.mq.RequestStatusMqDto;
+import dev.shvetsova.ewmc.dto.notification.NewNotificationDto;
 import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateRequest;
+import dev.shvetsova.ewmc.enums.SenderType;
 import dev.shvetsova.ewmc.event.enums.EventState;
 import dev.shvetsova.ewmc.event.enums.EventStateAction;
 import dev.shvetsova.ewmc.event.enums.SortType;
@@ -16,7 +19,6 @@ import dev.shvetsova.ewmc.event.model.Category;
 import dev.shvetsova.ewmc.event.model.Event;
 import dev.shvetsova.ewmc.event.model.Location;
 import dev.shvetsova.ewmc.event.mq.EventSupplier;
-import dev.shvetsova.ewmc.event.mq.RequestsSupplier;
 import dev.shvetsova.ewmc.event.repo.EventRepository;
 import dev.shvetsova.ewmc.event.service.category.CategoryService;
 import dev.shvetsova.ewmc.event.service.location.LocationService;
@@ -39,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static dev.shvetsova.ewmc.event.enums.EventStateAction.*;
 import static dev.shvetsova.ewmc.utils.UsersUtil.checkExistUser;
 import static java.lang.Boolean.FALSE;
 
@@ -55,8 +58,7 @@ public class EventServiceImpl implements EventService {
     private final LocationService locationService;
     private final StatsService statsService;
 
-    private final RequestsSupplier requestsSupplier;
-    private final EventSupplier eventSupplier;
+    private final EventSupplier supplier;
 
     @Override
     @Transactional
@@ -69,7 +71,7 @@ public class EventServiceImpl implements EventService {
 
         final Event event = EventMapper.fromDto(body, userId, category, location, EventState.PENDING, LocalDateTime.now());
         eventRepository.save(event);
-        eventSupplier.newEventFromUser(new EventInfoMq(userId, event.getId()));
+
         return EventMapper.toFullDto(event);
     }
 
@@ -201,6 +203,10 @@ public class EventServiceImpl implements EventService {
         updateStatusByUser(body, event);
 
         final Event savedEvent = eventRepository.save(event);
+
+        if (body.getStateAction() != null && PUBLISH_EVENT.name().equals(body.getStateAction())) {
+            supplier.newEventFromUserProduce(new EventInfoMq(userId, event.getId()));
+        }
         return EventMapper.toFullDto(savedEvent);
     }
 
@@ -249,7 +255,7 @@ public class EventServiceImpl implements EventService {
         }
         String newStatus = body.getStatus();
         if ("REJECTED".equals(newStatus)) {
-            requestsSupplier.changeStatusRequests(RequestMqDto.builder()
+            supplier.changeStatusRequests(RequestStatusMqDto.builder()
                     .userId(userId)
                     .eventId(eventId)
                     .request(body.getRequestIds())
@@ -270,7 +276,7 @@ public class EventServiceImpl implements EventService {
 
             final Boolean isRequestModeration = event.getRequestModeration();
             if ((participantLimit == 0) || FALSE.equals(isRequestModeration)) {
-                requestsSupplier.changeStatusRequests(RequestMqDto.builder()
+                supplier.changeStatusRequests(RequestStatusMqDto.builder()
                         .userId(userId)
                         .eventId(eventId)
                         .request(body.getRequestIds())
@@ -292,7 +298,7 @@ public class EventServiceImpl implements EventService {
             }
             event.setConfirmedRequests(currentConfirmed);
             if (!confirmedRequests.isEmpty()) {
-                requestsSupplier.changeStatusRequests(RequestMqDto.builder()
+                supplier.changeStatusRequests(RequestStatusMqDto.builder()
                         .userId(userId)
                         .eventId(eventId)
                         .request(confirmedRequests)
@@ -300,7 +306,7 @@ public class EventServiceImpl implements EventService {
                         .build());
             }
             if (!rejectedRequests.isEmpty()) {
-                requestsSupplier.changeStatusRequests(RequestMqDto.builder()
+                supplier.changeStatusRequests(RequestStatusMqDto.builder()
                         .userId(userId)
                         .eventId(eventId)
                         .request(rejectedRequests)
@@ -313,14 +319,51 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
+    public void getRequest(RequestMqDto request) {
+        Long eventId = request.getEventId();
+        Long requestId = request.getRequestId();
+        Long userId = request.getUserId();
+        Event event = findEventById(eventId);
+
+        if (event.getInitiatorId() == userId) {
+            throw new ConflictException(
+                    String.format("UserId=%d is initiator for event with id=%d", userId, eventId),
+                    "Conflict Exception");
+        }
+
+//        нельзя участвовать в неопубликованном событии (Ожидается код ошибки 409)<p>
+        if (!event.getState().equals("PUBLISHED")) {
+            throw new ConflictException(String.format("Event id=%d is not published", eventId),
+                    "ConflictException");
+        }
+//        если у события достигнут лимит запросов на участие - необходимо вернуть ошибку (Ожидается код ошибки 409)<p>
+        if (event.getParticipantLimit() != 0 && event.getParticipantLimit().equals(event.getConfirmedRequests())) {
+            throw new ConflictException("Event confirmed limit reached.", "Conflict exception");
+        }
+
+        if ((event.getParticipantLimit() == 0) || (!event.getRequestModeration())) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+            supplier.changeStatusRequests(new RequestStatusMqDto(List.of(requestId), userId, eventId, "CONFIRMED"));
+            return;
+        }
+        supplier.sendNewMessage(NewNotificationDto.builder()
+                .consumerId(userId)
+                .senderId(requestId)
+                .messageType(SenderType.REQUEST)
+                .text("Event request")
+                .build());
+    }
+
+    @Override
+    @Transactional
     public EventFullDto updateEventByAdmin(UpdateEventAdminRequest body, long eventId) {
         final Event event = eventRepository.findById(eventId).orElseThrow(
                 () -> new NotFoundException(String.format(Constants.EVENT_WITH_ID_D_WAS_NOT_FOUND, eventId),
                         Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND)
         );
 
-        updateData(
-                event, body.getAnnotation(),
+        updateData(event,
+                body.getAnnotation(),
                 body.getTitle(),
                 body.getDescription(),
                 body.getParticipantLimit(),
@@ -334,6 +377,10 @@ public class EventServiceImpl implements EventService {
         updateStatusByAdmin(body, event);
 
         final Event savedEvent = eventRepository.save(event);
+
+        if (body.getStateAction() != null && PUBLISH_EVENT.name().equals(body.getStateAction())) {
+            supplier.newEventFromUserProduce(new EventInfoMq(event.getInitiatorId(), event.getId()));
+        }
         return EventMapper.toFullDto(savedEvent);
     }
 
@@ -468,10 +515,10 @@ public class EventServiceImpl implements EventService {
      * Обновление статуса для public api
      */
     private void updateStatusByUser(UpdateEventUserRequest body, Event event) {
-        final EventStateAction newEventState = EventStateAction.from(body.getStateAction());
+        final EventStateAction newEventState = from(body.getStateAction());
         if (newEventState == null) return;
 
-        final Set<EventStateAction> availableStats = Set.of(EventStateAction.CANCEL_REVIEW, EventStateAction.SEND_TO_REVIEW);
+        final Set<EventStateAction> availableStats = Set.of(CANCEL_REVIEW, SEND_TO_REVIEW);
         checkStatus(availableStats, newEventState);
         event.setState(newEventState.getEventState());
     }
@@ -480,17 +527,17 @@ public class EventServiceImpl implements EventService {
      * Обновление статуса admin api
      */
     private void updateStatusByAdmin(UpdateEventAdminRequest body, Event event) {
-        final EventStateAction newEventState = EventStateAction.from(body.getStateAction());
+        final EventStateAction newEventState = from(body.getStateAction());
         if (newEventState == null) return;
 
-        final Set<EventStateAction> availableStats = Set.of(EventStateAction.PUBLISH_EVENT, EventStateAction.REJECT_EVENT);
+        final Set<EventStateAction> availableStats = Set.of(PUBLISH_EVENT, REJECT_EVENT);
         checkStatus(availableStats, newEventState);
 
         final EventState currentEventState = event.getState();
-        if (EventStateAction.PUBLISH_EVENT.equals(newEventState)) {
+        if (PUBLISH_EVENT.equals(newEventState)) {
             throwIfNotAvailableStatus(Set.of(EventState.PUBLISHED, EventState.CANCELED), currentEventState, newEventState);
             event.setPublishedOn(LocalDateTime.now());
-        } else if (EventStateAction.REJECT_EVENT.equals(newEventState)) {
+        } else if (REJECT_EVENT.equals(newEventState)) {
             throwIfNotAvailableStatus(Set.of(EventState.PUBLISHED, EventState.CANCELED), currentEventState, newEventState);
         }
         event.setState(newEventState.getEventState());

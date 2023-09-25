@@ -1,6 +1,6 @@
 package dev.shvetsova.ewmc.enums;
 
-public enum MessageType {
+public enum SenderType {
     FRIENDSHIP_REQUEST,
     EVENT,
     FRIENDSHIP_APPROVED,

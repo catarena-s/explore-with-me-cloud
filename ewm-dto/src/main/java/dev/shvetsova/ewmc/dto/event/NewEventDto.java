@@ -4,10 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.shvetsova.ewmc.dto.location.LocationDto;
 import dev.shvetsova.ewmc.utils.Constants;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -15,10 +11,6 @@ import java.time.LocalDateTime;
 /**
  * Новое событие
  */
-@Data
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor
 public class NewEventDto {
     @NotBlank(message = "User name cannot be empty or null")
     @Size(min = 3, max = 120, message = "size must be between 3 and 120")
@@ -59,4 +51,164 @@ public class NewEventDto {
     @NotNull(message = "Request moderation cannot be empty or null")
     private boolean requestModeration = true;
 
+    public NewEventDto(@NotBlank(message = "User name cannot be empty or null") @Size(min = 3, max = 120, message = "size must be between 3 and 120") String title, @NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 2000, message = "size must be between 20 and 2000") String annotation, @NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 7000, message = "size must be between 20 and 7000") String description, @NotNull(message = "Category cannot be empty or null") @Positive(message = "CategoryId must be positive") Long category, @NotNull(message = "EventDate cannot be empty or null") LocalDateTime eventDate, @NotNull(message = "Location cannot be empty or null") LocationDto location, @NotNull(message = "Paid cannot be empty or null") boolean paid, @NotNull(message = "Participant limit cannot be empty or null") @PositiveOrZero(message = "Participant limit must be positive or zero") Integer participantLimit, @NotNull(message = "Request moderation cannot be empty or null") boolean requestModeration) {
+        this.title = title;
+        this.annotation = annotation;
+        this.description = description;
+        this.category = category;
+        this.eventDate = eventDate;
+        this.location = location;
+        this.paid = paid;
+        this.participantLimit = participantLimit;
+        this.requestModeration = requestModeration;
+    }
+
+    public NewEventDto() {
+    }
+
+    public static NewEventDtoBuilder builder() {
+        return new NewEventDtoBuilder();
+    }
+
+    public @NotBlank(message = "User name cannot be empty or null") @Size(min = 3, max = 120, message = "size must be between 3 and 120") String getTitle() {
+        return this.title;
+    }
+
+    public @NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 2000, message = "size must be between 20 and 2000") String getAnnotation() {
+        return this.annotation;
+    }
+
+    public @NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 7000, message = "size must be between 20 and 7000") String getDescription() {
+        return this.description;
+    }
+
+    public @NotNull(message = "Category cannot be empty or null") @Positive(message = "CategoryId must be positive") Long getCategory() {
+        return this.category;
+    }
+
+    public @NotNull(message = "EventDate cannot be empty or null") LocalDateTime getEventDate() {
+        return this.eventDate;
+    }
+
+    public @NotNull(message = "Location cannot be empty or null") LocationDto getLocation() {
+        return this.location;
+    }
+
+    public @NotNull(message = "Paid cannot be empty or null") boolean isPaid() {
+        return this.paid;
+    }
+
+    public @NotNull(message = "Participant limit cannot be empty or null") @PositiveOrZero(message = "Participant limit must be positive or zero") Integer getParticipantLimit() {
+        return this.participantLimit;
+    }
+
+    public @NotNull(message = "Request moderation cannot be empty or null") boolean isRequestModeration() {
+        return this.requestModeration;
+    }
+
+    public void setTitle(@NotBlank(message = "User name cannot be empty or null") @Size(min = 3, max = 120, message = "size must be between 3 and 120") String title) {
+        this.title = title;
+    }
+
+    public void setAnnotation(@NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 2000, message = "size must be between 20 and 2000") String annotation) {
+        this.annotation = annotation;
+    }
+
+    public void setDescription(@NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 7000, message = "size must be between 20 and 7000") String description) {
+        this.description = description;
+    }
+
+    public void setCategory(@NotNull(message = "Category cannot be empty or null") @Positive(message = "CategoryId must be positive") Long category) {
+        this.category = category;
+    }
+
+    @JsonFormat(pattern = Constants.YYYY_MM_DD_HH_MM_SS)
+    public void setEventDate(@NotNull(message = "EventDate cannot be empty or null") LocalDateTime eventDate) {
+        this.eventDate = eventDate;
+    }
+
+    public void setLocation(@NotNull(message = "Location cannot be empty or null") LocationDto location) {
+        this.location = location;
+    }
+
+    public void setPaid(@NotNull(message = "Paid cannot be empty or null") boolean paid) {
+        this.paid = paid;
+    }
+
+    public void setParticipantLimit(@NotNull(message = "Participant limit cannot be empty or null") @PositiveOrZero(message = "Participant limit must be positive or zero") Integer participantLimit) {
+        this.participantLimit = participantLimit;
+    }
+
+    public void setRequestModeration(@NotNull(message = "Request moderation cannot be empty or null") boolean requestModeration) {
+        this.requestModeration = requestModeration;
+    }
+
+    public NewEventDtoBuilder toBuilder() {
+        return new NewEventDtoBuilder().title(this.title).annotation(this.annotation).description(this.description).category(this.category).eventDate(this.eventDate).location(this.location).paid(this.paid).participantLimit(this.participantLimit).requestModeration(this.requestModeration);
+    }
+
+    public static class NewEventDtoBuilder {
+        private @NotBlank(message = "User name cannot be empty or null") @Size(min = 3, max = 120, message = "size must be between 3 and 120") String title;
+        private @NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 2000, message = "size must be between 20 and 2000") String annotation;
+        private @NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 7000, message = "size must be between 20 and 7000") String description;
+        private @NotNull(message = "Category cannot be empty or null") @Positive(message = "CategoryId must be positive") Long category;
+        private @NotNull(message = "EventDate cannot be empty or null") LocalDateTime eventDate;
+        private @NotNull(message = "Location cannot be empty or null") LocationDto location;
+        private @NotNull(message = "Paid cannot be empty or null") boolean paid;
+        private @NotNull(message = "Participant limit cannot be empty or null") @PositiveOrZero(message = "Participant limit must be positive or zero") Integer participantLimit;
+        private @NotNull(message = "Request moderation cannot be empty or null") boolean requestModeration;
+
+        NewEventDtoBuilder() {
+        }
+
+        public NewEventDtoBuilder title(@NotBlank(message = "User name cannot be empty or null") @Size(min = 3, max = 120, message = "size must be between 3 and 120") String title) {
+            this.title = title;
+            return this;
+        }
+
+        public NewEventDtoBuilder annotation(@NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 2000, message = "size must be between 20 and 2000") String annotation) {
+            this.annotation = annotation;
+            return this;
+        }
+
+        public NewEventDtoBuilder description(@NotBlank(message = "User name cannot be empty or null") @Size(min = 20, max = 7000, message = "size must be between 20 and 7000") String description) {
+            this.description = description;
+            return this;
+        }
+
+        public NewEventDtoBuilder category(@NotNull(message = "Category cannot be empty or null") @Positive(message = "CategoryId must be positive") Long category) {
+            this.category = category;
+            return this;
+        }
+
+        @JsonFormat(pattern = Constants.YYYY_MM_DD_HH_MM_SS)
+        public NewEventDtoBuilder eventDate(@NotNull(message = "EventDate cannot be empty or null") LocalDateTime eventDate) {
+            this.eventDate = eventDate;
+            return this;
+        }
+
+        public NewEventDtoBuilder location(@NotNull(message = "Location cannot be empty or null") LocationDto location) {
+            this.location = location;
+            return this;
+        }
+
+        public NewEventDtoBuilder paid(@NotNull(message = "Paid cannot be empty or null") boolean paid) {
+            this.paid = paid;
+            return this;
+        }
+
+        public NewEventDtoBuilder participantLimit(@NotNull(message = "Participant limit cannot be empty or null") @PositiveOrZero(message = "Participant limit must be positive or zero") Integer participantLimit) {
+            this.participantLimit = participantLimit;
+            return this;
+        }
+
+        public NewEventDtoBuilder requestModeration(@NotNull(message = "Request moderation cannot be empty or null") boolean requestModeration) {
+            this.requestModeration = requestModeration;
+            return this;
+        }
+
+        public NewEventDto build() {
+            return new NewEventDto(this.title, this.annotation, this.description, this.category, this.eventDate, this.location, this.paid, this.participantLimit, this.requestModeration);
+        }
+    }
 }

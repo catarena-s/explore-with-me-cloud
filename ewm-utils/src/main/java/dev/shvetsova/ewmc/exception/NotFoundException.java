@@ -1,12 +1,10 @@
 package dev.shvetsova.ewmc.exception;
 
 import dev.shvetsova.ewmc.utils.Constants;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 
-@Getter
 public class NotFoundException extends RuntimeException implements ApiException {
 
     private final String reason;
@@ -37,5 +35,13 @@ public class NotFoundException extends RuntimeException implements ApiException 
                 .reason(reason)
                 .timestamp(timestamp)
                 .build();
+    }
+
+    public String getReason() {
+        return this.reason;
+    }
+
+    public String getTimestamp() {
+        return this.timestamp;
     }
 }

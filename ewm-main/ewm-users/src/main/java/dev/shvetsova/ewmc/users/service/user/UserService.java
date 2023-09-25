@@ -1,6 +1,7 @@
 package dev.shvetsova.ewmc.users.service.user;
 
 
+import dev.shvetsova.ewmc.dto.mq.FriendshipRequestMq;
 import dev.shvetsova.ewmc.dto.user.NewUserRequest;
 import dev.shvetsova.ewmc.dto.user.UserDto;
 
@@ -47,4 +48,6 @@ public interface UserService {
     boolean isExistUser(long userId);
 
     List<UserDto> getUsersList(long id, List<Long> userId);
+
+    void getFriendshipRequest(FriendshipRequestMq eventInfo);
 }

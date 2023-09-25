@@ -25,7 +25,7 @@ public class Friendship {
     private long followerId;
 
     //    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "friend_id")
+    @Column(name = "user_id")
     private long friendId;
 
     @Enumerated(EnumType.STRING)

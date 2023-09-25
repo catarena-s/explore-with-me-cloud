@@ -23,7 +23,7 @@ public class NotificationMapper {
                 .created(LocalDateTime.now())
                 .userId(dto.getUserId())
                 .senderId(dto.getSenderId())
-                .messageType(dto.getMessageType())
+                .senderType(dto.getMessageType())
                 .read(false)
                 .build();
     }

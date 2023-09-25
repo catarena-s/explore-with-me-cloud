@@ -5,11 +5,10 @@
     <parent>
         <groupId>dev.shvetsova.ewmc</groupId>
         <artifactId>ewm-main</artifactId>
-        <version>0.0.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>0.2</version>
     </parent>
     <artifactId>ewm-compilation</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>ewm-copillation</name>
     <description>ewm-copillation</description>
     <properties>
@@ -19,6 +18,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-loadbalancer</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -1,5 +1,7 @@
 package dev.shvetsova.ewmc.users.service.user;
 
+import dev.shvetsova.ewmc.dto.mq.FriendshipRequestMq;
+import dev.shvetsova.ewmc.dto.notification.NewNotificationDto;
 import dev.shvetsova.ewmc.dto.user.NewUserRequest;
 import dev.shvetsova.ewmc.dto.user.UserDto;
 import dev.shvetsova.ewmc.exception.ConflictException;
@@ -8,6 +10,7 @@ import dev.shvetsova.ewmc.users.http.EventClient;
 import dev.shvetsova.ewmc.users.http.RequestClient;
 import dev.shvetsova.ewmc.users.model.User;
 import dev.shvetsova.ewmc.users.model.UserMapper;
+import dev.shvetsova.ewmc.users.mq.Supplier;
 import dev.shvetsova.ewmc.users.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static dev.shvetsova.ewmc.enums.SenderType.FRIENDSHIP_REQUEST;
 import static dev.shvetsova.ewmc.utils.Constants.*;
 
 
@@ -26,6 +30,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EventClient eventClient;
     private final RequestClient requestClient;
+
+    private final Supplier supplier;
+//    private final NotificationSupplier notificationSupplier;
 
     @Override
     public UserDto registerUser(NewUserRequest body) {
@@ -88,6 +95,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getUsersList(long id, List<Long> userIds) {
         return UserMapper.toDto(userRepository.findAllById(userIds));
+    }
+
+    @Override
+    public void getFriendshipRequest(FriendshipRequestMq dto) {
+        Long userId = dto.getConsumerId();
+        Long senderId = dto.getRequesterId();
+        Long friendshipId = dto.getFriendshipId();
+        User user = findUserById(userId);
+        if (user.isAutoSubscribe()) {
+            supplier.approveFriendship(friendshipId);
+        } else {
+            supplier.sendMessage(NewNotificationDto.builder()
+                    .consumerId(userId)
+                    .senderId(senderId)
+                    .text("Friend request from user with id: " + senderId)
+                    .messageType(FRIENDSHIP_REQUEST)
+                    .build());
+        }
     }
 
     @Override

@@ -3,7 +3,7 @@ package dev.shvetsova.ewmc.request.service.request;
 import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateRequest;
 import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateResult;
 import dev.shvetsova.ewmc.dto.request.ParticipationRequestDto;
-import dev.shvetsova.ewmc.dto.mq.RequestMqDto;
+import dev.shvetsova.ewmc.dto.mq.RequestStatusMqDto;
 
 import java.util.List;
 
@@ -24,5 +24,5 @@ public interface RequestService {
 
     List<Long> getFriendsEventRequests(long userId, List<Long> friendsId);
 
-    void changeStatusRequests(RequestMqDto payload);
+    void changeStatusRequests(RequestStatusMqDto payload);
 }

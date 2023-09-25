@@ -1,19 +1,60 @@
 package dev.shvetsova.ewmc.dto.location;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 /**
  * Широта и долгота места проведения события
  */
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class LocationDto {
     private Float lat;
     private Float lon;
+
+    public LocationDto(Float lat, Float lon) {
+        this.lat = lat;
+        this.lon = lon;
+    }
+
+    public LocationDto() {
+    }
+
+    public static LocationDtoBuilder builder() {
+        return new LocationDtoBuilder();
+    }
+
+    public Float getLat() {
+        return this.lat;
+    }
+
+    public Float getLon() {
+        return this.lon;
+    }
+
+    public void setLat(Float lat) {
+        this.lat = lat;
+    }
+
+    public void setLon(Float lon) {
+        this.lon = lon;
+    }
+
+    public static class LocationDtoBuilder {
+        private Float lat;
+        private Float lon;
+
+        LocationDtoBuilder() {
+        }
+
+        public LocationDtoBuilder lat(Float lat) {
+            this.lat = lat;
+            return this;
+        }
+
+        public LocationDtoBuilder lon(Float lon) {
+            this.lon = lon;
+            return this;
+        }
+
+        public LocationDto build() {
+            return new LocationDto(this.lat, this.lon);
+        }
+    }
 }

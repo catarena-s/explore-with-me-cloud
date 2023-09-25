@@ -57,7 +57,6 @@ public class CompilationServiceImpl implements CompilationService {
                 ? compilationRepository.findAll(page).getContent()
                 : compilationRepository.findAllByPinned(pinned, page).getContent();
         final List<CompilationDto> compilationDtoList = new ArrayList<>();
-        // todo сделать один запрос в БД и один запрос на сервис, использовать группировку streamAPI
         for (Compilation c : compilations) {
             final List<Long> eventIds = compilationEventRepository.findAllByCompilationId(c.getId());
             final List<EventShortDto> events = getEventListForCompilation(eventIds);

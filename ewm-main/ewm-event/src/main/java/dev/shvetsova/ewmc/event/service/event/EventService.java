@@ -1,8 +1,8 @@
 package dev.shvetsova.ewmc.event.service.event;
 
 import dev.shvetsova.ewmc.dto.event.*;
+import dev.shvetsova.ewmc.dto.mq.RequestMqDto;
 import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateRequest;
-import dev.shvetsova.ewmc.dto.request.EventRequestStatusUpdateResult;
 import dev.shvetsova.ewmc.event.enums.SortType;
 import dev.shvetsova.ewmc.event.model.Event;
 import jakarta.servlet.http.HttpServletRequest;
@@ -98,4 +98,6 @@ public interface EventService {
     void upConfirmedRequests(long userId, long eventId);
 
     void changeRequestStatus(EventRequestStatusUpdateRequest body, long userId, long eventId);
+
+    void getRequest(RequestMqDto dto);
 }

@@ -11,13 +11,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.shvetsova.ewmc</groupId>
     <artifactId>explore-with-me-cloud</artifactId>
-    <version>1.0</version>
+    <version>1.0.2</version>
     <packaging>pom</packaging>
     <modules>
         <module>git-config</module>
         <module>server</module>
         <module>gateway</module>
         <module>ewm-stats</module>
+        <module>ewm-main</module>
         <module>ewm-dto</module>
         <module>ewm-utils</module>
     </modules>

@@ -4,13 +4,12 @@ import dev.shvetsova.ewmc.dto.event.EventShortDto;
 import dev.shvetsova.ewmc.dto.mq.EventInfoMq;
 import dev.shvetsova.ewmc.dto.notification.NewNotificationDto;
 import dev.shvetsova.ewmc.dto.user.UserDto;
-import dev.shvetsova.ewmc.enums.MessageType;
+import dev.shvetsova.ewmc.enums.SenderType;
 import dev.shvetsova.ewmc.subscription.http.EventClient;
 import dev.shvetsova.ewmc.subscription.http.RequestClient;
 import dev.shvetsova.ewmc.subscription.http.UserClient;
 import dev.shvetsova.ewmc.subscription.model.Friendship;
-import dev.shvetsova.ewmc.subscription.mq.MessageAction;
-import dev.shvetsova.ewmc.subscription.mq.NotificationSupplier;
+import dev.shvetsova.ewmc.subscription.mq.Supplier;
 import dev.shvetsova.ewmc.subscription.repo.FriendshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,63 +21,59 @@ import static dev.shvetsova.ewmc.utils.UsersUtil.checkExistUser;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class FriendServiceImpl implements FriendService {
+
     private final UserClient userClient;
     private final EventClient eventClient;
     private final RequestClient requestClient;
     private final FriendshipRepository friendshipRepository;
 
-    private final NotificationSupplier notificationSupplier;
+    private final Supplier supplier;
 
     /**
      * Получение списка друзей
      */
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getFriends(long userId) {
         checkExistUser(userClient, userId);
         return userClient.getUserList(userId, friendshipRepository.findAllFriends(userId));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getFollowers(long userId) {
         checkExistUser(userClient, userId);
         return userClient.getUserList(userId, friendshipRepository.findAllFollowers(userId));
-    }
-
-    public void sendNotificationToFriends(EventInfoMq eventInfoMq) {
-        List<Friendship> allByFriendId = friendshipRepository.findAllByFriendId(eventInfoMq.userId());
-        Long eventId = eventInfoMq.eventId();
-        allByFriendId.forEach(f -> {
-            notificationSupplier.sendNewMessage(NewNotificationDto.builder()
-                    .text("New event from yor friend")
-                    .userId(f.getFollowerId())
-                    .senderId(eventId)
-                    .messageType(MessageType.EVENT)
-                    .build());
-        });
     }
 
     /**
      * Получить список событий в которых примут участие друзья
      */
     @Override
-    @Transactional(readOnly = true)
     public List<EventShortDto> getParticipateEvents(long followerId, int from, int size) {
         checkExistUser(userClient, followerId);
         List<Long> allFriends = friendshipRepository.findAllFriends(followerId);
         List<Long> eventListIds = requestClient.getParticipateEventList(followerId, allFriends);
-        List<EventShortDto> eventList = eventClient.getEventListByIds(eventListIds);
-        return eventList;
+        return eventClient.getEventListByIds(eventListIds);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EventShortDto> getFriendEvents(long followerId, int from, int size) {
         checkExistUser(userClient, followerId);
         List<Long> allFriends = friendshipRepository.findAllFriends(followerId);
-        List<EventShortDto> eventList = eventClient.getEventList(followerId, allFriends);
-        return eventList;
+        return eventClient.getEventList(followerId, allFriends);
+    }
+
+    @Override
+    public void sendNotificationToFollowers(EventInfoMq eventInfoMq) {
+        List<Friendship> allByFriendId = friendshipRepository.findAllByFriendId(eventInfoMq.userId());
+        Long eventId = eventInfoMq.eventId();
+        allByFriendId.forEach(f -> supplier.sendNewMessage(NewNotificationDto.builder()
+                .consumerId(f.getFollowerId())
+                .senderId(eventId)
+                .messageType(SenderType.EVENT)
+                .text("New event from yor friend")
+                .build())
+        );
     }
 }

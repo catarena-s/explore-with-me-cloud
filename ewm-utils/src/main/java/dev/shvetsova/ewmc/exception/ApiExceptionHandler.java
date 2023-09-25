@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import dev.shvetsova.ewmc.utils.Constants;
 import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.PropertyValueException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 import static dev.shvetsova.ewmc.utils.Constants.FORMATTER;
 import static org.springframework.http.HttpStatus.*;
 
-@Slf4j
 public class ApiExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(BAD_REQUEST)

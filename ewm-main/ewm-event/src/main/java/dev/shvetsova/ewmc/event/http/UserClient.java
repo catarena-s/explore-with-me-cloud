@@ -2,6 +2,7 @@ package dev.shvetsova.ewmc.event.http;
 
 import dev.shvetsova.ewmc.dto.user.UserDto;
 import dev.shvetsova.ewmc.utils.UserFeignClient;
+//import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -15,5 +15,5 @@ public interface FriendService {
 
     List<UserDto> getFollowers(long userId);
 
-    void sendNotificationToFriends(EventInfoMq eventInfoMq);
+    void sendNotificationToFollowers(EventInfoMq eventInfoMq);
 }

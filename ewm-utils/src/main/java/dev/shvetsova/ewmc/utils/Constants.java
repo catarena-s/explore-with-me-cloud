@@ -1,12 +1,8 @@
 package dev.shvetsova.ewmc.utils;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Constants {
     public static final String STATS_ENDPOINT = "/stats";
     public static final String HIT_ENDPOINT = "/hit";
@@ -29,4 +25,6 @@ public class Constants {
     public static final LocalDateTime START = LocalDateTime.of(1900, 1, 1, 0, 0, 0);
     public static final LocalDateTime END = LocalDateTime.of(2222, 12, 31, 23, 59, 59);
 
+    private Constants() {
+    }
 }

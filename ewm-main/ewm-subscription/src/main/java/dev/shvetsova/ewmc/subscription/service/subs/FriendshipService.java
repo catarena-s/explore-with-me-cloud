@@ -19,4 +19,6 @@ public interface FriendshipService {
     List<FriendshipShortDto> getFriendshipRequests(long followerId, String filter);
 
     List<FriendshipShortDto> getIncomingFriendRequests(long userId, String filter);
+
+    void approveFriendship(Long friendshipId);
 }

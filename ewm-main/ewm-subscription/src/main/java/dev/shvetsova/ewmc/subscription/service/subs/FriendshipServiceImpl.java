@@ -1,17 +1,16 @@
 package dev.shvetsova.ewmc.subscription.service.subs;
 
+import dev.shvetsova.ewmc.dto.mq.FriendshipRequestMq;
 import dev.shvetsova.ewmc.dto.notification.NewNotificationDto;
 import dev.shvetsova.ewmc.dto.subs.FriendshipDto;
 import dev.shvetsova.ewmc.dto.subs.FriendshipShortDto;
-import dev.shvetsova.ewmc.dto.user.UserDto;
-import dev.shvetsova.ewmc.enums.MessageType;
 import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.subscription.http.UserClient;
 import dev.shvetsova.ewmc.subscription.mapper.FriendshipMapper;
 import dev.shvetsova.ewmc.subscription.model.Friendship;
 import dev.shvetsova.ewmc.subscription.model.FriendshipState;
-import dev.shvetsova.ewmc.subscription.mq.NotificationSupplier;
+import dev.shvetsova.ewmc.subscription.mq.Supplier;
 import dev.shvetsova.ewmc.subscription.repo.FriendshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static dev.shvetsova.ewmc.enums.MessageType.*;
+import static dev.shvetsova.ewmc.enums.SenderType.FRIENDSHIP_APPROVED;
+import static dev.shvetsova.ewmc.enums.SenderType.FRIENDSHIP_REJECTED;
 import static dev.shvetsova.ewmc.subscription.model.FriendshipState.*;
 
 
@@ -32,34 +32,33 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final FriendshipRepository friendshipRepository;
 
     private final UserClient userClient;
-    private final NotificationSupplier notificationSupplier;
+    private final Supplier supplier;
 
     /**
      * Создать запрос на дружбу
      *
-     * @param followerId Id пользователя подавшего заявку на дружбу
-     * @param userId     Id пользователя добавляемого в друзья
+     * @param requesterId Id пользователя подавшего заявку на дружбу
+     * @param userId      Id пользователя добавляемого в друзья
      */
     @Override
     @Transactional
-    public FriendshipDto requestFriendship(long followerId, long userId) {
-        if (followerId == userId) {
+    public FriendshipDto requestFriendship(long requesterId, long userId) {
+        if (requesterId == userId) {
             throw new ConflictException("You can't follow yourself.");
         }
-        userClient.checkExistById(followerId);
-        final UserDto friend = userClient.findUserById(userId);
 
-        throwWhenFriendshipExist(followerId, userId);
+        throwWhenFriendshipExist(requesterId, userId);
 
         final Friendship friendshipRequest = Friendship.builder()
-                .followerId(followerId)
+                .followerId(requesterId)
                 .friendId(userId)
-                .state(friend.getIsAutoSubscribe() ? APPROVED : PENDING)
+                .state(PENDING)
                 .createdOn(LocalDateTime.now())
                 .build();
-        final Friendship friendship = friendshipRepository.save(friendshipRequest);
-        sendNotification(followerId, userId, FRIENDSHIP_REQUEST, "Request friendship");
 
+        final Friendship friendship = friendshipRepository.save(friendshipRequest);
+
+        supplier.friendshipRequest(new FriendshipRequestMq(userId, requesterId, friendship.getId()));
 
         return FriendshipMapper.toDto(friendship);
     }
@@ -82,8 +81,13 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         subList.forEach(FriendshipServiceImpl::approveFriendship);
         final List<Friendship> saved = friendshipRepository.saveAll(subList);
-        for (Long id : ids){
-            sendNotification(id, userId, FRIENDSHIP_APPROVED, "Friendship was APPROVED.");
+        for (Long id : ids) {
+            supplier.sendNewMessage(NewNotificationDto.builder()
+                    .consumerId(id)
+                    .senderId(userId)
+                    .messageType(FRIENDSHIP_APPROVED)
+                    .text("Friendship was APPROVED.")
+                    .build());
         }
 
         return saved.stream().map(FriendshipMapper::toShortDto).collect(Collectors.toList());
@@ -103,19 +107,15 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         subList.forEach(FriendshipServiceImpl::rejectFriendship);
         final List<Friendship> saved = friendshipRepository.saveAll(subList);
-        for (Long id : ids){
-            sendNotification(id, userId, FRIENDSHIP_REJECTED, "Friendship was REJECTED.");
+        for (Long id : ids) {
+            supplier.sendNewMessage(NewNotificationDto.builder()
+                    .consumerId(id)
+                    .senderId(userId)
+                    .messageType(FRIENDSHIP_REJECTED)
+                    .text("Friendship was REJECTED.")
+                    .build());
         }
         return saved.stream().map(FriendshipMapper::toShortDto).collect(Collectors.toList());
-    }
-
-    private void sendNotification(Long userId, long senderId, MessageType messageType, String text) {
-        notificationSupplier.sendNewMessage(NewNotificationDto.builder()
-                .userId(userId)
-                .senderId(senderId)
-                .messageType(messageType)
-                .text(text)
-                .build());
     }
 
     /**
@@ -147,6 +147,16 @@ public class FriendshipServiceImpl implements FriendshipService {
                 ? friendshipRepository.findAllByFriendId(userId)
                 : friendshipRepository.findAllByFriendIdAndState(userId, from(filter));
         return f.stream().map(FriendshipMapper::toShortDto).toList();
+    }
+
+    @Override
+    @Transactional
+    public void approveFriendship(Long friendshipId) {
+        Friendship friendship = friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new NotFoundException("Friendship not found."));
+
+        friendship.setState(APPROVED);
+        friendshipRepository.save(friendship);
     }
 
     /**
@@ -203,4 +213,6 @@ public class FriendshipServiceImpl implements FriendshipService {
     private static void rejectFriendship(Friendship f) {
         f.setState(REJECTED);
     }
+
+
 }

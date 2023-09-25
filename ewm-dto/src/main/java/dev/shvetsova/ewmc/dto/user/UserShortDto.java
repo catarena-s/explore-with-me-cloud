@@ -1,17 +1,43 @@
 package dev.shvetsova.ewmc.dto.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 /**
  * Пользователь (краткая информация)
  */
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class UserShortDto {
     private Long id;
+
+    public UserShortDto(Long id) {
+        this.id = id;
+    }
+
+    public UserShortDto() {
+    }
+
+    public static UserShortDtoBuilder builder() {
+        return new UserShortDtoBuilder();
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public static class UserShortDtoBuilder {
+        private Long id;
+
+        UserShortDtoBuilder() {
+        }
+
+        public UserShortDtoBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public UserShortDto build() {
+            return new UserShortDto(this.id);
+        }
+    }
 }
