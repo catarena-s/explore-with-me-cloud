@@ -46,9 +46,5 @@ public class EventRequestStatusUpdateResult {
         public EventRequestStatusUpdateResult build() {
             return new EventRequestStatusUpdateResult(this.confirmedRequests, this.rejectedRequests);
         }
-
-        public String toString() {
-            return "EventRequestStatusUpdateResult.EventRequestStatusUpdateResultBuilder(confirmedRequests=" + this.confirmedRequests + ", rejectedRequests=" + this.rejectedRequests + ")";
-        }
     }
 }

@@ -48,9 +48,5 @@ public class LocationDto {
         public LocationDto build() {
             return new LocationDto(this.lat, this.lon);
         }
-
-        public String toString() {
-            return "LocationDto.LocationDtoBuilder(lat=" + this.lat + ", lon=" + this.lon + ")";
-        }
     }
 }

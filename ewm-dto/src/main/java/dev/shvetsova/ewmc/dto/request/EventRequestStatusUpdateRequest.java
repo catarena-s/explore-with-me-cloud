@@ -49,9 +49,5 @@ public class EventRequestStatusUpdateRequest {
         public EventRequestStatusUpdateRequest build() {
             return new EventRequestStatusUpdateRequest(this.requestIds, this.status);
         }
-
-        public String toString() {
-            return "EventRequestStatusUpdateRequest.EventRequestStatusUpdateRequestBuilder(requestIds=" + this.requestIds + ", status=" + this.status + ")";
-        }
     }
 }

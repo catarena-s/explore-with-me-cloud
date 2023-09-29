@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.shvetsova.ewmc.utils.Constants;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-//import org.apache.naming.factory.Constants;
 
 import java.time.LocalDateTime;
 
@@ -82,10 +81,6 @@ public class EndpointHitDto {
 
         public EndpointHitDto build() {
             return new EndpointHitDto(this.app, this.uri, this.ip, this.timestamp);
-        }
-
-        public String toString() {
-            return "EndpointHitDto.EndpointHitDtoBuilder(app=" + this.app + ", uri=" + this.uri + ", ip=" + this.ip + ", timestamp=" + this.timestamp + ")";
         }
     }
 }

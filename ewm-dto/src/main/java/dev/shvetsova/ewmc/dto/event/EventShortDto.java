@@ -38,14 +38,6 @@ public class EventShortDto {
     public EventShortDto() {
     }
 
-    public static EventShortDtoBuilder builder() {
-        return new EventShortDtoBuilder();
-    }
-
-    public EventShortDtoBuilder toBuilder() {
-        return new EventShortDtoBuilder().id(this.id).title(this.title).annotation(this.annotation).category(this.category).confirmedRequests(this.confirmedRequests).eventDate(this.eventDate).initiator(this.initiator).paid(this.paid).views(this.views);
-    }
-
     public Long getId() {
         return id;
     }
@@ -80,6 +72,14 @@ public class EventShortDto {
 
     public Long getViews() {
         return views;
+    }
+
+    public static EventShortDtoBuilder builder() {
+        return new EventShortDtoBuilder();
+    }
+
+    public EventShortDtoBuilder toBuilder() {
+        return new EventShortDtoBuilder().id(this.id).title(this.title).annotation(this.annotation).category(this.category).confirmedRequests(this.confirmedRequests).eventDate(this.eventDate).initiator(this.initiator).paid(this.paid).views(this.views);
     }
 
     public static class EventShortDtoBuilder {
@@ -144,10 +144,6 @@ public class EventShortDto {
 
         public EventShortDto build() {
             return new EventShortDto(this.id, this.title, this.annotation, this.category, this.confirmedRequests, this.eventDate, this.initiator, this.paid, this.views);
-        }
-
-        public String toString() {
-            return "EventShortDto.EventShortDtoBuilder(id=" + this.id + ", title=" + this.title + ", annotation=" + this.annotation + ", category=" + this.category + ", confirmedRequests=" + this.confirmedRequests + ", eventDate=" + this.eventDate + ", initiator=" + this.initiator + ", paid=" + this.paid + ", views=" + this.views + ")";
         }
     }
 }

@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static dev.shvetsova.ewmc.utils.Constants.FORMATTER;
 import static org.springframework.http.HttpStatus.*;
@@ -31,8 +30,7 @@ public class ApiExceptionHandler {
     public ApiError handleHttpMessageNotReadableException(final HttpMessageNotReadableException e) {
         Throwable cause = e.getCause();
         String msg;
-        if (cause instanceof ValueInstantiationException) {
-            ValueInstantiationException vie = (ValueInstantiationException) cause;
+        if (cause instanceof ValueInstantiationException vie) {
             msg = vie.getOriginalMessage();
         } else msg = e.getMessage();
         return ApiError.builder()
@@ -77,8 +75,7 @@ public class ApiExceptionHandler {
     public ApiError handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
         Throwable cause = e.getCause();
         String msg;
-        if (cause instanceof ConversionFailedException) {
-            ConversionFailedException cfe = (ConversionFailedException) cause;
+        if (cause instanceof ConversionFailedException cfe) {
             Throwable mostSpecificCause = cfe.getMostSpecificCause();
             msg = mostSpecificCause.getMessage();
         } else msg = e.getMessage();
@@ -167,7 +164,7 @@ public class ApiExceptionHandler {
                 .message(e.getMessage())
                 .errors(Arrays.stream(e.getStackTrace())
                         .map(Object::toString)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .timestamp(LocalDateTime.now().format(Constants.FORMATTER))
                 .build();
     }

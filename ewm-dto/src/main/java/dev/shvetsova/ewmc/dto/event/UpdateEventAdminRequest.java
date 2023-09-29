@@ -27,7 +27,11 @@ public class UpdateEventAdminRequest {
     private Boolean requestModeration;
     private String stateAction;
 
-    public UpdateEventAdminRequest(@Size(min = 3, max = 120, message = "size must be between 3 and 20") String title, @Size(min = 20, max = 2000, message = "size must be between 20 and 2000") String annotation, @Size(min = 20, max = 7000, message = "size must be between 20 and 7000") String description, Long category, LocalDateTime eventDate, LocationDto location, Boolean paid, Integer participantLimit, Boolean requestModeration, String stateAction) {
+    public UpdateEventAdminRequest(@Size(min = 3, max = 120, message = "size must be between 3 and 20") String title,
+                                   @Size(min = 20, max = 2000, message = "size must be between 20 and 2000") String annotation,
+                                   @Size(min = 20, max = 7000, message = "size must be between 20 and 7000") String description,
+                                   Long category, LocalDateTime eventDate, LocationDto location, Boolean paid, Integer participantLimit,
+                                   Boolean requestModeration, String stateAction) {
         this.title = title;
         this.annotation = annotation;
         this.description = description;
@@ -155,10 +159,6 @@ public class UpdateEventAdminRequest {
 
         public UpdateEventAdminRequest build() {
             return new UpdateEventAdminRequest(this.title, this.annotation, this.description, this.category, this.eventDate, this.location, this.paid, this.participantLimit, this.requestModeration, this.stateAction);
-        }
-
-        public String toString() {
-            return "UpdateEventAdminRequest.UpdateEventAdminRequestBuilder(title=" + this.title + ", annotation=" + this.annotation + ", description=" + this.description + ", category=" + this.category + ", eventDate=" + this.eventDate + ", location=" + this.location + ", paid=" + this.paid + ", participantLimit=" + this.participantLimit + ", requestModeration=" + this.requestModeration + ", stateAction=" + this.stateAction + ")";
         }
     }
 }

@@ -13,22 +13,14 @@ public class CompilationDto {
     private String title;
     private List<EventShortDto> events;
 
+    public CompilationDto() {
+    }
+
     public CompilationDto(Long id, Boolean pinned, String title, List<EventShortDto> events) {
         this.id = id;
         this.pinned = pinned;
         this.title = title;
         this.events = events;
-    }
-
-    public CompilationDto() {
-    }
-
-    public static CompilationDtoBuilder builder() {
-        return new CompilationDtoBuilder();
-    }
-
-    public CompilationDtoBuilder toBuilder() {
-        return new CompilationDtoBuilder().id(this.id).pinned(this.pinned).title(this.title).events(this.events);
     }
 
     public Long getId() {
@@ -61,6 +53,14 @@ public class CompilationDto {
 
     public void setEvents(List<EventShortDto> events) {
         this.events = events;
+    }
+
+    public static CompilationDtoBuilder builder() {
+        return new CompilationDtoBuilder();
+    }
+
+    public CompilationDtoBuilder toBuilder() {
+        return new CompilationDtoBuilder().id(this.id).pinned(this.pinned).title(this.title).events(this.events);
     }
 
     public static class CompilationDtoBuilder {
@@ -96,8 +96,5 @@ public class CompilationDto {
             return new CompilationDto(this.id, this.pinned, this.title, this.events);
         }
 
-        public String toString() {
-            return "CompilationDto.CompilationDtoBuilder(id=" + this.id + ", pinned=" + this.pinned + ", title=" + this.title + ", events=" + this.events + ")";
-        }
     }
 }

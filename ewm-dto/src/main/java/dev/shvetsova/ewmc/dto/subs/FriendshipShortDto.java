@@ -59,8 +59,5 @@ public class FriendshipShortDto {
             return new FriendshipShortDto(this.id, this.state, this.friend);
         }
 
-        public String toString() {
-            return "FriendshipShortDto.FriendshipShortDtoBuilder(id=" + this.id + ", state=" + this.state + ", friend=" + this.friend + ")";
-        }
     }
 }

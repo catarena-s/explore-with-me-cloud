@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
+
 
 /**
  * Данные нового пользователя
@@ -18,6 +20,16 @@ public class NewUserRequest {
     @Email(message = "Email must be valid")
     @Size(min = 6, max = 254, message = "size must be between 6 and 254")
     private String email;
+
+    private List<String> defaultRole;
+
+    public void setDefaultRole(List<String> defaultRole) {
+        this.defaultRole = defaultRole;
+    }
+
+    public List<String> getDefaultRole() {
+        return this.defaultRole;
+    }
 
     private String password;
 
@@ -94,9 +106,5 @@ public class NewUserRequest {
         public NewUserRequest build() {
             return new NewUserRequest(this.name, this.email, this.password);
         }
-
-//        public String toString() {
-//            return "NewUserRequest.NewUserRequestBuilder(name=" + this.name + ", email=" + this.email + ")";
-//        }
     }
 }

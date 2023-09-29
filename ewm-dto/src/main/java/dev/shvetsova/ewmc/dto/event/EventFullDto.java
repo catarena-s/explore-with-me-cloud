@@ -58,14 +58,6 @@ public class EventFullDto {
         this.views = views;
     }
 
-    public static EventFullDtoBuilder builder() {
-        return new EventFullDtoBuilder();
-    }
-
-    public EventFullDtoBuilder toBuilder() {
-        return new EventFullDtoBuilder().id(this.id).title(this.title).annotation(this.annotation).category(this.category).paid(this.paid).eventDate(this.eventDate).initiator(this.initiator).confirmedRequests(this.confirmedRequests).description(this.description).participantLimit(this.participantLimit).state(this.state).createdOn(this.createdOn).publishedOn(this.publishedOn).location(this.location).requestModeration(this.requestModeration).views(this.views);
-    }
-
     public Long getId() {
         return id;
     }
@@ -128,6 +120,14 @@ public class EventFullDto {
 
     public Long getViews() {
         return views;
+    }
+
+    public static EventFullDtoBuilder builder() {
+        return new EventFullDtoBuilder();
+    }
+
+    public EventFullDtoBuilder toBuilder() {
+        return new EventFullDtoBuilder().id(this.id).title(this.title).annotation(this.annotation).category(this.category).paid(this.paid).eventDate(this.eventDate).initiator(this.initiator).confirmedRequests(this.confirmedRequests).description(this.description).participantLimit(this.participantLimit).state(this.state).createdOn(this.createdOn).publishedOn(this.publishedOn).location(this.location).requestModeration(this.requestModeration).views(this.views);
     }
 
     public static class EventFullDtoBuilder {
@@ -236,10 +236,6 @@ public class EventFullDto {
 
         public EventFullDto build() {
             return new EventFullDto(this.id, this.title, this.annotation, this.category, this.paid, this.eventDate, this.initiator, this.confirmedRequests, this.description, this.participantLimit, this.state, this.createdOn, this.publishedOn, this.location, this.requestModeration, this.views);
-        }
-
-        public String toString() {
-            return "EventFullDto.EventFullDtoBuilder(id=" + this.id + ", title=" + this.title + ", annotation=" + this.annotation + ", category=" + this.category + ", paid=" + this.paid + ", eventDate=" + this.eventDate + ", initiator=" + this.initiator + ", confirmedRequests=" + this.confirmedRequests + ", description=" + this.description + ", participantLimit=" + this.participantLimit + ", state=" + this.state + ", createdOn=" + this.createdOn + ", publishedOn=" + this.publishedOn + ", location=" + this.location + ", requestModeration=" + this.requestModeration + ", views=" + this.views + ")";
         }
     }
 }

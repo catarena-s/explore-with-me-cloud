@@ -67,9 +67,5 @@ public class NewNotificationDto {
         public NewNotificationDto build() {
             return new NewNotificationDto(this.userId, this.senderId, this.messageType, this.text);
         }
-
-        public String toString() {
-            return "NewNotificationDto.NewNotificationDtoBuilder(userId=" + this.userId + ", senderId=" + this.senderId + ", messageType=" + this.messageType + ", text=" + this.text + ")";
-        }
     }
 }

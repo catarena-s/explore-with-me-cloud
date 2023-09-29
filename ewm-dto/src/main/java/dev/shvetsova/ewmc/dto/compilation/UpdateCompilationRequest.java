@@ -14,18 +14,11 @@ public class UpdateCompilationRequest {
     private Boolean pinned;
     private List<Long> events;
 
-    UpdateCompilationRequest(@Size(min = 1, max = 50, message = "size must be between 1 and 50") String title, Boolean pinned, List<Long> events) {
+    UpdateCompilationRequest(@Size(min = 1, max = 50, message = "size must be between 1 and 50") String title,
+                             Boolean pinned, List<Long> events) {
         this.title = title;
         this.pinned = pinned;
         this.events = events;
-    }
-
-    public static UpdateCompilationRequestBuilder builder() {
-        return new UpdateCompilationRequestBuilder();
-    }
-
-    public UpdateCompilationRequestBuilder toBuilder() {
-        return new UpdateCompilationRequestBuilder().title(this.title).pinned(this.pinned).events(this.events);
     }
 
     public String getTitle() {
@@ -38,6 +31,14 @@ public class UpdateCompilationRequest {
 
     public List<Long> getEvents() {
         return events;
+    }
+
+    public static UpdateCompilationRequestBuilder builder() {
+        return new UpdateCompilationRequestBuilder();
+    }
+
+    public UpdateCompilationRequestBuilder toBuilder() {
+        return new UpdateCompilationRequestBuilder().title(this.title).pinned(this.pinned).events(this.events);
     }
 
     public static class UpdateCompilationRequestBuilder {
@@ -65,10 +66,6 @@ public class UpdateCompilationRequest {
 
         public UpdateCompilationRequest build() {
             return new UpdateCompilationRequest(this.title, this.pinned, this.events);
-        }
-
-        public String toString() {
-            return "UpdateCompilationRequest.UpdateCompilationRequestBuilder(title=" + this.title + ", pinned=" + this.pinned + ", events=" + this.events + ")";
         }
     }
 }

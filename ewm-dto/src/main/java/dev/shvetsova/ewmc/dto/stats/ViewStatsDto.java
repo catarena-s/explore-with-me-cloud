@@ -1,5 +1,7 @@
 package dev.shvetsova.ewmc.dto.stats;
 
+import java.util.Objects;
+
 public class ViewStatsDto implements Comparable<ViewStatsDto> {
     private String app;
     private String uri;
@@ -21,6 +23,19 @@ public class ViewStatsDto implements Comparable<ViewStatsDto> {
     @Override
     public int compareTo(ViewStatsDto o) {
         return (int) (o.getHits() - hits);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ViewStatsDto that = (ViewStatsDto) o;
+        return hits == that.hits && Objects.equals(app, that.app) && Objects.equals(uri, that.uri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(app, uri, hits);
     }
 
     public String getApp() {
@@ -62,8 +77,5 @@ public class ViewStatsDto implements Comparable<ViewStatsDto> {
             return new ViewStatsDto(this.app, this.uri, this.hits);
         }
 
-        public String toString() {
-            return "ViewStatsDto.ViewStatsDtoBuilder(app=" + this.app + ", uri=" + this.uri + ", hits=" + this.hits + ")";
-        }
     }
 }

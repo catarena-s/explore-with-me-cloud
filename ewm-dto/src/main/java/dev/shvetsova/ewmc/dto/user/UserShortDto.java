@@ -35,9 +35,5 @@ public class UserShortDto {
         public UserShortDto build() {
             return new UserShortDto(this.id);
         }
-
-        public String toString() {
-            return "UserShortDto.UserShortDtoBuilder(id=" + this.id + ")";
-        }
     }
 }

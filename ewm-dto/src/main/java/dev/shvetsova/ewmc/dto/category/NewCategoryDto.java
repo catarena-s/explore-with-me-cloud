@@ -13,15 +13,16 @@ public class NewCategoryDto {
     @Size(max = 50, message = "size must be between 0 and 50")
     private String name;
 
-    public NewCategoryDto(/*@NotBlank(message = "Category name cannot be empty or null") @Size(max = 50, message = "size must be between 0 and 50") */String name) {
+    public NewCategoryDto() {
+    }
+
+    public NewCategoryDto(@NotBlank(message = "Category name cannot be empty or null")
+                          @Size(max = 50, message = "size must be between 0 and 50") String name) {
         this.name = name;
     }
 
     public String getName() {
         return name;
-    }
-
-    public NewCategoryDto() {
     }
 
     public static NewCategoryDtoBuilder builder() {
@@ -36,7 +37,8 @@ public class NewCategoryDto {
         NewCategoryDtoBuilder() {
         }
 
-        public NewCategoryDtoBuilder name(@NotBlank(message = "Category name cannot be empty or null") @Size(max = 50, message = "size must be between 0 and 50") String name) {
+        public NewCategoryDtoBuilder name(@NotBlank(message = "Category name cannot be empty or null")
+                                          @Size(max = 50, message = "size must be between 0 and 50") String name) {
             this.name = name;
             return this;
         }

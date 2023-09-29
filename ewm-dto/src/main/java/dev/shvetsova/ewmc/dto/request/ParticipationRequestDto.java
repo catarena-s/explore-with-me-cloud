@@ -124,9 +124,5 @@ public class ParticipationRequestDto {
         public ParticipationRequestDto build() {
             return new ParticipationRequestDto(this.id, this.event, this.requester, this.created, this.status, this.isPrivate);
         }
-
-        public String toString() {
-            return "ParticipationRequestDto.ParticipationRequestDtoBuilder(id=" + this.id + ", event=" + this.event + ", requester=" + this.requester + ", created=" + this.created + ", status=" + this.status + ", isPrivate=" + this.isPrivate + ")";
-        }
     }
 }
