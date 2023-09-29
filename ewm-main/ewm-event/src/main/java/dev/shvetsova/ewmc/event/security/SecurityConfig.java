@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter)));
 
 
+
         return http.build();
     }
 }

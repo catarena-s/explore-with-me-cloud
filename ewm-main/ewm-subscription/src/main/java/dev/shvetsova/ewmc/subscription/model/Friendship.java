@@ -20,11 +20,11 @@ public class Friendship {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "user_id")
+    @Column(name = "follower_id")
     private String followerId;
 
-    @Column(name = "friend_id")
-    private String friendId;
+    @Column(name = "user_id")
+    private String userId;
 
     @Enumerated(EnumType.STRING)
     private FriendshipState state;

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static dev.shvetsova.ewmc.utils.Constants.*;
 
@@ -49,7 +48,7 @@ public class StatsServerController {
 
         return statsService.getStats(start, end, uris, unique)
                 .stream().sorted()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private String getPathStr(LocalDateTime start, LocalDateTime end, String[] uris, boolean unique) {

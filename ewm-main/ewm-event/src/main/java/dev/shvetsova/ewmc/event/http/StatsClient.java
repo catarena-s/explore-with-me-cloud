@@ -2,6 +2,7 @@ package dev.shvetsova.ewmc.event.http;
 
 import dev.shvetsova.ewmc.dto.stats.EndpointHitDto;
 import dev.shvetsova.ewmc.dto.stats.ViewStatsDto;
+import dev.shvetsova.ewmc.event.security.OAuthFeignConfig;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static dev.shvetsova.ewmc.utils.Constants.*;
 
-@FeignClient(name = "ewm-stats",url = "http://localhost:8765/ewm-stats/")
+@FeignClient(name = "ewm-stats", configuration = OAuthFeignConfig.class)
 public interface StatsClient {
     @PostMapping(HIT_ENDPOINT)
     ResponseEntity<Object> saveHit(@Valid @RequestBody EndpointHitDto dto);

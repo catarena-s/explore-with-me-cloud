@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
@@ -20,7 +19,7 @@ public class UserMapper {
     }
 
     public static List<UserDto> toDto(List<User> fiends) {
-        return fiends.stream().map(UserMapper::toDto).collect(Collectors.toList());
+        return fiends.stream().map(UserMapper::toDto).toList();
     }
 
     public static User fromDto(NewUserRequest body, String uid) {

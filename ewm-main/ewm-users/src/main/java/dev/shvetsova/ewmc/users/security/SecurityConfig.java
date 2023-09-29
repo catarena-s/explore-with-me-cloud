@@ -26,9 +26,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/users/*").hasRole("user"))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/admin/*").hasRole("admin"))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
-        http.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer
-                .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter)));
-
+        http
+                .oauth2ResourceServer(oauth2Configurer -> oauth2Configurer
+                        .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter)));
 
         return http.build();
     }

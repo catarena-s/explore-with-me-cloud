@@ -14,4 +14,8 @@ public interface CompilationEventRepository extends JpaRepository<CompilationEve
     List<Long> findAllByCompilationId(long compilation);
 
     void deleteAllById_CompilationId(long compId);
+
+    @Query("select new dev.shvetsova.ewmc.compilation.model.CompilationEventKey(c.id.compilationId,c.id.eventId) " +
+            "from CompilationEvent c where c.id.compilationId in(:ids)")
+    List<CompilationEventKey> findAllByCompilationIdIn(List<Long> ids);
 }

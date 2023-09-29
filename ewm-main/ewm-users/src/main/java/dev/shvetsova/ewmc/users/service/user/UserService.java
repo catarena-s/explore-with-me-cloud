@@ -41,7 +41,5 @@ public interface UserService {
 
     UserDto changeSubscribeMode(String userId, boolean isAutoSubscribe);
 
-//    boolean isExistUser(String userId);
-
     List<UserDto> getUsersList(List<String> userId);
 }

@@ -73,7 +73,7 @@ public class StatsServiceImpl implements StatsService {
         return (response != null)
                 ? response.stream()
                 .map(object -> objectMapper.convertValue(object, ViewStatsDto.class))
-                .filter(v -> v.getApp().equals(appName)).collect(Collectors.toList())
+                .filter(v -> v.getApp().equals(appName)).toList()
                 : Collections.emptyList();
     }
 
@@ -81,7 +81,7 @@ public class StatsServiceImpl implements StatsService {
     private List<ViewStatsDto> getResponse(String requestURI, List<Long> ids, LocalDateTime start, LocalDateTime end, boolean unique) {
         final List<String> idsList = ids.stream()
                 .map(id -> requestURI + "/" + id)
-                .collect(Collectors.toList());
+                .toList();
         return getResponse(idsList, start, end, unique);
     }
 

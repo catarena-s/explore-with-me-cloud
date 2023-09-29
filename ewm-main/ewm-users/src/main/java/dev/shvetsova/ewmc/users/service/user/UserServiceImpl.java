@@ -5,23 +5,18 @@ import dev.shvetsova.ewmc.dto.user.UserDto;
 import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.users.http.EventClient;
+import dev.shvetsova.ewmc.users.http.KeycloakClient;
 import dev.shvetsova.ewmc.users.http.RequestClient;
-import dev.shvetsova.ewmc.users.keycloak.KeycloakService;
 import dev.shvetsova.ewmc.users.model.User;
 import dev.shvetsova.ewmc.users.model.UserMapper;
 import dev.shvetsova.ewmc.users.repo.UserRepository;
-import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import org.keycloak.admin.client.CreatedResponseUtil;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static dev.shvetsova.ewmc.utils.Constants.*;
 
@@ -33,26 +28,19 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EventClient eventClient;
     private final RequestClient requestClient;
-    private final KeycloakService keycloakService;
+
+    private final KeycloakClient keycloakClient;
+
     private static final String USER_ROLE = "user";
 
     @Override
     @Transactional
     public UserDto registerUser(NewUserRequest newUser) {
-        List<String> defaultRole = List.of(USER_ROLE);
+        final List<String> defaultRole = List.of(USER_ROLE);
+        newUser.setDefaultRole(defaultRole);
+        final String userResponseId = keycloakClient.registerUser(newUser);
 
-        Response userResponse = keycloakService.createKeycloakUser(newUser);
-        HttpStatus httpStatus = HttpStatus.resolve(userResponse.getStatus());
-        if (httpStatus != HttpStatus.OK) {
-            if (Objects.requireNonNull(httpStatus) == HttpStatus.CONFLICT) {
-                throw new ConflictException(String.format("exists user with user_name='%s' or email='%s'",
-                        newUser.getName(), newUser.getEmail()));
-            }
-        }
-        String createdId = CreatedResponseUtil.getCreatedId(userResponse);
-        keycloakService.addRole(createdId, defaultRole);
-
-        return addUserToDataBase(newUser, createdId);
+        return addUserToDataBase(newUser, userResponseId);
     }
 
 
@@ -64,25 +52,24 @@ public class UserServiceImpl implements UserService {
                 : userRepository.findAllByUidIn(ids, page).getContent();
         return users.stream()
                 .map(UserMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 
     @Override
     @Transactional
     public void delete(String userId) {
-
         Boolean hasInitiatedEvents = eventClient.checkEvents(userId);
         Boolean hasRequestToEvents = requestClient.checkRequests(userId);
         if (hasInitiatedEvents == null) throw new RuntimeException("Error request to events-service");
         if (hasRequestToEvents == null) throw new RuntimeException("Error request to requests-service");
 
-        keycloakService.deleteUser(userId);
         if (hasInitiatedEvents.equals(Boolean.TRUE) || hasRequestToEvents.equals(Boolean.TRUE)) {
             throw new ConflictException(
                     String.format("User with id='%s' initiated an event or has a request to participate in an event.", userId),
                     FOR_THE_REQUESTED_OPERATION_THE_CONDITIONS_ARE_NOT_MET);
         }
+        keycloakClient.delete(userId);
         userRepository.deleteByUid(userId);
     }
 

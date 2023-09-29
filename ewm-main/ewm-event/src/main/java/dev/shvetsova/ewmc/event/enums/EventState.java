@@ -2,8 +2,6 @@ package dev.shvetsova.ewmc.event.enums;
 
 import lombok.Getter;
 
-//import static ru.practicum.mapper.EnumMapper.getEnumFromString;
-
 @Getter
 public enum EventState {
     CANCELED,

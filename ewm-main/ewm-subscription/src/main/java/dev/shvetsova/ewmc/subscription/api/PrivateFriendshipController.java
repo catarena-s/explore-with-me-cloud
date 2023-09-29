@@ -9,16 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,7 +24,7 @@ public class PrivateFriendshipController {
 
     /**
      * Отправка запрос на дружбу<br>
-     * POST /users/{userId}/friendships/{friendId} <br>
+     * POST /users/friendships/{friendId} <br>
      * - дружба не взаимная <br>
      * - нельзя добавить повторный запрос если текущий статус PENDING или APPROVED (Ожидается код ошибки 409) <br>
      * - нельзя подписаться на самого себя (Ожидается код ошибки 409) <br>
@@ -46,13 +37,13 @@ public class PrivateFriendshipController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable("friendId") String friendId) {
         String userId = jwt.getSubject();
-        log.debug("Request received POST '/users/{}/friendships/{}'", userId, friendId);
+        log.debug("Request received POST '/users/friendships/{}'", friendId);
         return friendshipService.requestFriendship(userId, friendId);
     }
 
     /**
      * Удаление отправленного запроса на дружбу<br>
-     * DELETE /users/{userId}/friendships/{subsId} <br>
+     * DELETE /users/friendships/{subsId} <br>
      */
     @DeleteMapping("/{subsId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
@@ -60,13 +51,13 @@ public class PrivateFriendshipController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable("subsId") Long subsId) {
         String userId = jwt.getSubject();
-        log.debug("Request received DELETE /users/{}/friendships/{}", userId, subsId);
+        log.debug("Request received DELETE /users/friendships/{}", subsId);
         friendshipService.deleteFriendshipRequest(userId, subsId);
     }
 
     /**
      * Подтверждение полученного запроса на дружбу<br>
-     * PATCH /users/{userId}/friendships/approve?ids={ids} <br>
+     * PATCH /users/friendships/approve?ids={ids} <br>
      * - Подтвердить можно только запросы в ожидании(PENDING) (Ожидается код ошибки 409)
      */
     @PatchMapping("/approve")
@@ -74,13 +65,13 @@ public class PrivateFriendshipController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam(value = "ids") List<Long> ids) {
         String userId = jwt.getSubject();
-        log.debug("Request received PATCH '/users/{}/friendships/approve?ids={}'", userId, ids);
+        log.debug("Request received PATCH '/users/friendships/approve?ids={}'", ids);
         return friendshipService.approveFriendship(userId, ids);
     }
 
     /**
      * Отклонение полученного запроса на дружбу<br>
-     * PATCH /users/{userId}/friendships/reject?ids={ids} <br>
+     * PATCH /users/friendships/reject?ids={ids} <br>
      * - Отклонить можно только запросы в состоянии PENDING или APPROVED (Ожидается код ошибки 409)
      */
     @PatchMapping("/reject")
@@ -88,7 +79,7 @@ public class PrivateFriendshipController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam(value = "ids") List<Long> ids) {
         String userId = jwt.getSubject();
-        log.debug("Request received PATCH '/users/{}/friendships/reject?ids={}'", userId, ids);
+        log.debug("Request received PATCH '/users/friendships/reject?ids={}'", ids);
         return friendshipService.rejectFriendship(userId, ids);
     }
 
@@ -103,7 +94,7 @@ public class PrivateFriendshipController {
             @RequestParam(value = "filter", defaultValue = "ALL") String filter
     ) {
         String userId = jwt.getSubject();
-        log.debug("Request received POST /users/{}/friendships?filter={}", userId, filter);
+        log.debug("Request received POST /users/friendships?filter={}", filter);
         return friendshipService.getFriendshipRequests(userId, filter);
     }
 
@@ -118,7 +109,7 @@ public class PrivateFriendshipController {
             @RequestParam(value = "filter", defaultValue = "ALL") String filter
     ) {
         String userId = jwt.getSubject();
-        log.debug("Request received POST /users/{}/followers?filter={}", userId, filter);
+        log.debug("Request received POST /users/followers?filter={}", filter);
         return friendshipService.getIncomingFriendRequests(userId, filter);
     }
 }

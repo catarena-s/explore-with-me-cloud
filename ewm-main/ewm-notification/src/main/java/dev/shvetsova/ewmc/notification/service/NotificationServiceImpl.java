@@ -28,20 +28,20 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationDto getById(String userId, long id) {
-        Notification notification = notificationRepository.findByIdAndUserId(id, userId);
+        Notification notification = notificationRepository.findByIdAndConsumerId(id, userId);
         return NotificationMapper.toDto(notification);
     }
 
     @Override
     public List<NotificationDto> getAllMsg(String userId) {
-        List<Notification> notificationList = notificationRepository.findAllByUserId(userId);
+        List<Notification> notificationList = notificationRepository.findAllByConsumerId(userId);
         return notificationList.stream().map(NotificationMapper::toDto).toList();
     }
 
     @Override
     @Transactional
     public NotificationDto markAsRead(String userId, long id) {
-        Notification notification = notificationRepository.findByIdAndUserId(id, userId);
+        Notification notification = notificationRepository.findByIdAndConsumerId(id, userId);
         notification.setRead(true);
         notificationRepository.save(notification);
         return NotificationMapper.toDto(notification);
@@ -50,7 +50,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public List<NotificationDto> markAsReadList(String userId, List<Long> ids) {
-        List<Notification> notificationList = notificationRepository.findAllByUserId(userId);
+        List<Notification> notificationList = notificationRepository.findAllByConsumerId(userId);
         notificationList.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(notificationList);
         return notificationList.stream().map(NotificationMapper::toDto).toList();
@@ -59,12 +59,12 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void deleteById(String userId, long id) {
-        notificationRepository.deleteByIdAndUserId(id, userId);
+        notificationRepository.deleteByIdAndConsumerId(id, userId);
     }
 
     @Override
     @Transactional
     public void deleteList(String userId, List<Long> ids) {
-        notificationRepository.deleteByIdInAndUserId(ids, userId);
+        notificationRepository.deleteByIdInAndConsumerId(ids, userId);
     }
 }

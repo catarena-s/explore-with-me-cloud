@@ -10,8 +10,8 @@ import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.subscription.mapper.FriendshipMapper;
 import dev.shvetsova.ewmc.subscription.model.Friendship;
 import dev.shvetsova.ewmc.subscription.model.FriendshipState;
+import dev.shvetsova.ewmc.subscription.mq.FriendshipRequestSupplier;
 import dev.shvetsova.ewmc.subscription.mq.NotificationSupplier;
-import dev.shvetsova.ewmc.subscription.mq.UserSupplier;
 import dev.shvetsova.ewmc.subscription.repo.FriendshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static dev.shvetsova.ewmc.enums.MessageType.FRIENDSHIP_APPROVED;
 import static dev.shvetsova.ewmc.enums.MessageType.FRIENDSHIP_REJECTED;
@@ -33,7 +32,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final FriendshipRepository friendshipRepository;
 
     private final NotificationSupplier notificationSupplier;
-    private final UserSupplier userSupplier;
+    private final FriendshipRequestSupplier friendshipRequestSupplier;
 
     /**
      * Создать запрос на дружбу
@@ -51,13 +50,13 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         final Friendship friendshipRequest = Friendship.builder()
                 .followerId(followerId)
-                .friendId(friendId)
+                .userId(friendId)
                 .state(PENDING)
                 .createdOn(LocalDateTime.now())
                 .build();
         final Friendship friendship = friendshipRepository.save(friendshipRequest);
 
-        userSupplier.sendFriendshipRequest(new FriendshipRequestMq(friendId, followerId));
+        friendshipRequestSupplier.sendMessageToQueue(new FriendshipRequestMq(friendId, followerId));
         return FriendshipMapper.toDto(friendship);
     }
 
@@ -83,7 +82,7 @@ public class FriendshipServiceImpl implements FriendshipService {
             sendNotification(String.valueOf(id), userId, FRIENDSHIP_APPROVED, "Friendship was APPROVED.");
         }
 
-        return saved.stream().map(FriendshipMapper::toShortDto).collect(Collectors.toList());
+        return saved.stream().map(FriendshipMapper::toShortDto).toList();
     }
 
     @Override
@@ -92,7 +91,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         String followerId = requestMq.followerId();
         String userId = requestMq.friendId();
 
-        Friendship friendship = friendshipRepository.findAllByFriendIdAndFollowerId(userId, followerId)
+        Friendship friendship = friendshipRepository.findAllByUserIdAndFollowerId(userId, followerId)
                 .orElseThrow(() -> new NotFoundException("Friendship request no exist."));
         approveFriendship(friendship);
         friendshipRepository.save(friendship);
@@ -115,11 +114,11 @@ public class FriendshipServiceImpl implements FriendshipService {
         for (Long id : ids) {
             sendNotification(String.valueOf(id), userId, FRIENDSHIP_REJECTED, "Friendship was REJECTED.");
         }
-        return saved.stream().map(FriendshipMapper::toShortDto).collect(Collectors.toList());
+        return saved.stream().map(FriendshipMapper::toShortDto).toList();
     }
 
     private void sendNotification(String userId, String senderId, MessageType messageType, String text) {
-        notificationSupplier.sendNewMessage(NewNotificationDto.builder()
+        notificationSupplier.sendMessageToQueue(NewNotificationDto.builder()
                 .userId(userId)
                 .senderId(senderId)
                 .messageType(messageType)
@@ -150,8 +149,8 @@ public class FriendshipServiceImpl implements FriendshipService {
                 REJECTED.name()));
 
         List<Friendship> f = ("ALL".equalsIgnoreCase(filter))
-                ? friendshipRepository.findAllByFriendId(userId)
-                : friendshipRepository.findAllByFriendIdAndState(userId, from(filter));
+                ? friendshipRepository.findAllByUserId(userId)
+                : friendshipRepository.findAllByUserIdAndState(userId, from(filter));
         return f.stream().map(FriendshipMapper::toShortDto).toList();
     }
 
@@ -177,7 +176,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private void throwWhenWrongFilter(String filter, Set<String> set) {
         if (!set.contains(filter)) {
             throw new ConflictException(String.format("Wrong filter. Filter should be one of: %s",
-                    set.stream().sorted().collect(Collectors.toList())));
+                    set.stream().sorted().toList()));
         }
     }
 
@@ -189,13 +188,13 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     private void throwWhenFriendshipExist(String userId, String friendId) {
-        if (friendshipRepository.existsByFollowerIdAndFriendIdAndStateNot(userId, friendId, REJECTED)) {
+        if (friendshipRepository.existsByFollowerIdAndUserIdAndStateNot(userId, friendId, REJECTED)) {
             throw new ConflictException("Already friends.");
         }
     }
 
     private void confirmUser(String userId, List<Friendship> subs) {
-        final boolean allMatchUser = subs.stream().allMatch(s -> s.getFriendId().equals(userId));
+        final boolean allMatchUser = subs.stream().allMatch(s -> s.getUserId().equals(userId));
         if (!allMatchUser) {
             throw new ConflictException("You can change only your requests.");
         }

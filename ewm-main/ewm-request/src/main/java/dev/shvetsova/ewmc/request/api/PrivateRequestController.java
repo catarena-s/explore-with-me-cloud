@@ -28,7 +28,7 @@ public class PrivateRequestController {
         return requestService.addParticipationRequest(userId, eventId);
     }
 
-    @GetMapping("/events/{eventId}/requests")
+    @GetMapping("/requests/events/{eventId}")
     public List<ParticipationRequestDto> getEventParticipants(
             @PathVariable(value = "eventId") long eventId,
             @AuthenticationPrincipal Jwt jwt) {
@@ -37,6 +37,14 @@ public class PrivateRequestController {
         return requestService.getEventParticipants(userId, eventId);
     }
 
+    @GetMapping("/requests/{id}")
+    public ParticipationRequestDto getUserRequests(
+            @PathVariable(value = "id") long id,
+            @AuthenticationPrincipal Jwt jwt) {
+        final String userId = jwt.getSubject();
+        log.debug("Request received GET /users/{}/requests", userId);
+        return requestService.getUserRequest(userId,id);
+    }
     @GetMapping("/requests")
     public List<ParticipationRequestDto> getUserRequests(
             @AuthenticationPrincipal Jwt jwt) {
@@ -93,9 +101,7 @@ public class PrivateRequestController {
 
     @GetMapping("/requests/check/{userId}")
     public boolean checkRequest(
-            @PathVariable(value = "userId") String uId,
-            @AuthenticationPrincipal Jwt jwt) {
-//        final String userId = jwt.getSubject();
+            @PathVariable(value = "userId") String uId) {
         log.debug("Request received GET /users/{}/events", uId);
         return requestService.isExistByRequester(uId);
     }

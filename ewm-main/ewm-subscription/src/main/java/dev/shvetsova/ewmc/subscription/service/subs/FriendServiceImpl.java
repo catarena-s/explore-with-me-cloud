@@ -33,26 +33,24 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> getFriends(String userId) {
-        return userClient.getUserList(userId, friendshipRepository.findAllFriends(userId));
+        return userClient.getUserList(friendshipRepository.findAllFriends(userId));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> getFollowers(String userId) {
-        return userClient.getUserList(userId, friendshipRepository.findAllFollowers(userId));
+        return userClient.getUserList(friendshipRepository.findAllFollowers(userId));
     }
 
     public void sendNotificationToFriends(EventInfoMq eventInfoMq) {
-        List<Friendship> allByFriendId = friendshipRepository.findAllByFriendId(eventInfoMq.userId());
+        List<Friendship> allByFriendId = friendshipRepository.findAllByUserId(eventInfoMq.userId());
         Long eventId = eventInfoMq.eventId();
-        allByFriendId.forEach(f -> {
-            notificationSupplier.sendNewMessage(NewNotificationDto.builder()
-                    .text("New event from yor friend")
-                    .userId(f.getFollowerId())
-                    .senderId(String.valueOf(eventId))
-                    .messageType(MessageType.EVENT)
-                    .build());
-        });
+        allByFriendId.forEach(f -> notificationSupplier.sendMessageToQueue(NewNotificationDto.builder()
+                .text("New event from yor friend")
+                .userId(f.getFollowerId())
+                .senderId(String.valueOf(eventId))
+                .messageType(MessageType.EVENT)
+                .build()));
     }
 
     /**
@@ -62,7 +60,7 @@ public class FriendServiceImpl implements FriendService {
     @Transactional(readOnly = true)
     public List<EventShortDto> getParticipateEvents(String followerId, int from, int size) {
         List<Long> allFriends = friendshipRepository.findAllFriends(followerId);
-        List<Long> eventListIds = requestClient.getParticipateEventList(followerId, allFriends);
+        List<Long> eventListIds = requestClient.getParticipateEventList(allFriends);
         return eventClient.getEventListByIds(eventListIds);
     }
 
@@ -70,6 +68,6 @@ public class FriendServiceImpl implements FriendService {
     @Transactional(readOnly = true)
     public List<EventShortDto> getFriendEvents(String followerId, int from, int size) {
         List<Long> allFriends = friendshipRepository.findAllFriends(followerId);
-        return eventClient.getEventList(followerId, allFriends);
+        return eventClient.getEventList(allFriends);
     }
 }

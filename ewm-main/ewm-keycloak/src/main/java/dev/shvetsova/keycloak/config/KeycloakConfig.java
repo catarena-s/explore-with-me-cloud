@@ -1,4 +1,4 @@
-package dev.shvetsova.ewmc.users.keycloak;
+package dev.shvetsova.keycloak.config;
 
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;

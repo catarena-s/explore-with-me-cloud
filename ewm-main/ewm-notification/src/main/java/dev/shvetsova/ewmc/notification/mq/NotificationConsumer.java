@@ -16,6 +16,6 @@ public class NotificationConsumer {
 
     @Bean
     public Consumer<Message<NewNotificationDto>> newNotificationConsumer() {
-        return message -> notificationService.addNotification(message.getPayload()); // будет считывать данные из потока Flux (как только туда попадают новые сообщения)
+        return message -> notificationService.addNotification(message.getPayload());
     }
 }

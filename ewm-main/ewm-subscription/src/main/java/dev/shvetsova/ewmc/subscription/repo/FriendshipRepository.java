@@ -13,23 +13,23 @@ import java.util.Optional;
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     void deleteByFollowerIdAndId(String followerId, Long friendId);
 
-    boolean existsByFollowerIdAndFriendIdAndStateNot(String followerId, String friendId, FriendshipState status);
+    boolean existsByFollowerIdAndUserIdAndStateNot(String followerId, String friendId, FriendshipState status);
 
     boolean existsByIdAndFollowerId(long subsId, String followerId);
 
-    @Query("select f.friendId from Friendship f where f.followerId=:userId")
+    @Query("select f.userId from Friendship f where f.followerId=:userId")
     List<Long> findAllFriends(String userId);
 
-    @Query("select f.followerId from Friendship f where f.friendId=:userId")
+    @Query("select f.followerId from Friendship f where f.userId=:userId")
     List<Long> findAllFollowers(String userId);
 
-    List<Friendship> findAllByFriendIdAndState(String userId, FriendshipState from);
+    List<Friendship> findAllByUserIdAndState(String userId, FriendshipState from);
 
-    List<Friendship> findAllByFriendId(String userId);
+    List<Friendship> findAllByUserId(String userId);
 
     List<Friendship> findAllByFollowerIdAndState(String userId, FriendshipState from);
 
     List<Friendship> findAllByFollowerId(String userId);
 
-    Optional<Friendship> findAllByFriendIdAndFollowerId(String userId, String followerId);
+    Optional<Friendship> findAllByUserIdAndFollowerId(String userId, String followerId);
 }

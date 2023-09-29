@@ -40,5 +40,4 @@ public class PublicCompilationController {
         log.debug("RequestParams: pinned={},from={},size={}", pinned, from, size);
         return compilationService.getCompilations(pinned, from, size);
     }
-
 }

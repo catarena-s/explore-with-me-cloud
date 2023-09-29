@@ -65,9 +65,7 @@ public class PrivateEventController {
 
     @GetMapping("/check/{userId}")
     public boolean checkEvents(
-            @PathVariable(value = "userId") String uId,
-            @AuthenticationPrincipal Jwt jwt) {
-//        String userId = jwt.getSubject();
+            @PathVariable(value = "userId") String uId) {
         log.debug("Request received GET /users/{}/events", uId);
         return eventService.isExistByInitiator(uId);
     }
@@ -78,16 +76,8 @@ public class PrivateEventController {
         return eventService.getPublishedEvents(friendsId);
     }
 
-    @GetMapping("/up/{id}")
-    public boolean upConfirmedRequests(@PathVariable(value = "id") long id,
-                                       @AuthenticationPrincipal Jwt jwt) {
-        String userId = jwt.getSubject();
-        log.debug("Request received GET /users/{}/events", userId);
-        eventService.upConfirmedRequests(userId, id);
-        return true;
-    }
-
     @PatchMapping("/{eventId}/requests")
+    @ResponseStatus(HttpStatus.OK)
     public void changeRequestStatus(@RequestBody EventRequestStatusUpdateRequest body,
                                     @PathVariable(value = "eventId") long eventId,
                                     @AuthenticationPrincipal Jwt jwt) {

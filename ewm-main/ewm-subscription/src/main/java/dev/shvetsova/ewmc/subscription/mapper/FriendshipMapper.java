@@ -12,7 +12,7 @@ public class FriendshipMapper {
         return FriendshipDto.builder()
                 .id(friendship.getId())
                 .followerId(friendship.getFollowerId())
-                .friend(UserMapper.toShotDto(friendship.getFriendId()))
+                .friend(UserMapper.toShotDto(friendship.getUserId()))
                 .state(friendship.getState().name())
                 .build();
     }
@@ -20,7 +20,7 @@ public class FriendshipMapper {
     public static FriendshipShortDto toShortDto(Friendship friendship) {
         return FriendshipShortDto.builder()
                 .id(friendship.getId())
-                .friend(UserMapper.toShotDto(friendship.getFriendId()))
+                .friend(UserMapper.toShotDto(friendship.getUserId()))
                 .state(friendship.getState().name())
                 .build();
     }

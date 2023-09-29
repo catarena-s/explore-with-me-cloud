@@ -33,24 +33,24 @@ public class PrivateFriendController {
     @GetMapping("/friends")
     public List<UserDto> getFriends(@AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
-        log.debug("Request received POST '/users/{}/friends'", userId);
+        log.debug("Request received POST '/users/sub/friends'");
         return friendService.getFriends(userId);
     }
 
     /**
      * Получить список подписчиков текущего пользователя<br>
-     * GET /users/{userId}/followers
+     * GET /users/followers
      */
     @GetMapping("/followers")
     public List<UserDto> getFollowers(@AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
-        log.debug("Request received POST '/users/{}'", userId);
+        log.debug("Request received POST '/users/sub/followers'");
         return friendService.getFollowers(userId);
     }
 
     /**
      * Получить события в которых будут участвовать друзья текущего пользователя<br>
-     * GET /users/{userId}/friends/share?from={from}&size={size}
+     * GET /users/friends/share?from={from}&size={size}
      */
     @GetMapping("/friends/share")
     public List<EventShortDto> getParticipateEvents(
@@ -58,13 +58,13 @@ public class PrivateFriendController {
             @PositiveOrZero @RequestParam(value = "from", defaultValue = FROM) int from,
             @Positive @RequestParam(value = "size", defaultValue = PAGE_SIZE) int size) {
         String userId = jwt.getSubject();
-        log.debug("Request received GET /users/friends/share?from={}&size={}", userId, from, size);
+        log.debug("Request received GET /users/sub/friends/share?from={}&size={}", from, size);
         return friendService.getParticipateEvents(userId, from, size);
     }
 
     /**
      * Получить список событий опубликованных друзьями текущего пользователя<br>
-     * GET /users/{userId}/friends/events?from={from}&size={size}
+     * GET /users/friends/events?from={from}&size={size}
      */
     @GetMapping("/friends/events")
     public List<EventShortDto> getFriendEvents(
@@ -72,7 +72,7 @@ public class PrivateFriendController {
             @PositiveOrZero @RequestParam(value = "from", defaultValue = FROM) int from,
             @Positive @RequestParam(value = "size", defaultValue = PAGE_SIZE) int size) {
         String userId = jwt.getSubject();
-        log.debug("Request received GET /users/{}/friends/events?from={}&size={}", userId, from, size);
+        log.debug("Request received GET /users/sub/friends/events?from={}&size={}",  from, size);
         return friendService.getFriendEvents(userId, from, size);
     }
 

@@ -26,7 +26,6 @@ public class PrivateUserController {
     public UserDto changeSubscribeMode(@RequestParam(value = "auto", defaultValue = "true") boolean isAutoSubscribe,
                                        @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
-        log.debug("Request received PATCH /users/{}/subs?auto={}", userId, isAutoSubscribe);
         return userService.changeSubscribeMode(userId, isAutoSubscribe);
     }
 

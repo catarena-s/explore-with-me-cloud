@@ -22,8 +22,8 @@ public class Notification {
 
     private String text;
 
-    @Column(name = "user_id")
-    private String userId;
+    @Column(name = "consumer_id")
+    private String consumerId;
 
     @Column(name = "sender_id")
     private String senderId;

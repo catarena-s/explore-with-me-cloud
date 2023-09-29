@@ -19,9 +19,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static dev.shvetsova.ewmc.utils.Constants.COMPILATION_WITH_ID_WAS_NOT_FOUND;
 import static dev.shvetsova.ewmc.utils.Constants.THE_REQUIRED_OBJECT_WAS_NOT_FOUND;
@@ -44,10 +43,9 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private List<EventShortDto> getEventListForCompilation(List<Long> eventIds) {
-        final List<EventShortDto> events = (eventIds != null)
+        return (eventIds != null)
                 ? eventClient.findEventsByIds(eventIds)
                 : Collections.emptyList();
-        return events;
     }
 
     @Override
@@ -56,12 +54,29 @@ public class CompilationServiceImpl implements CompilationService {
         final List<Compilation> compilations = (pinned == null)
                 ? compilationRepository.findAll(page).getContent()
                 : compilationRepository.findAllByPinned(pinned, page).getContent();
+        final List<CompilationEventKey> allByCompilationIdIn = compilationEventRepository.findAllByCompilationIdIn(
+                compilations.stream()
+                        .map(Compilation::getId)
+                        .toList());
+        final Map<Long, List<Long>> compilationEventIds = allByCompilationIdIn.stream()
+                .collect(Collectors.groupingBy(CompilationEventKey::getCompilationId,
+                        Collectors.mapping(CompilationEventKey::getEventId, Collectors.toList())));
+
+        final List<Long> eventIds = compilationEventIds.values().stream()
+                .flatMap(Collection::stream)
+                .toList();
+
+        final List<EventShortDto> events = getEventListForCompilation(eventIds);
+
         final List<CompilationDto> compilationDtoList = new ArrayList<>();
-        // todo сделать один запрос в БД и один запрос на сервис, использовать группировку streamAPI
         for (Compilation c : compilations) {
-            final List<Long> eventIds = compilationEventRepository.findAllByCompilationId(c.getId());
-            final List<EventShortDto> events = getEventListForCompilation(eventIds);
-            compilationDtoList.add(CompilationMapper.toDto(c, events));
+            List<Long> compilationEvents = compilationEventIds.get(c.getId());
+            if (compilationEvents == null || compilationEvents.isEmpty()) {
+                compilationDtoList.add(CompilationMapper.toDto(c, null));
+                continue;
+            }
+            List<EventShortDto> dtoList = events.stream().filter(e -> compilationEvents.contains(e.getId())).toList();
+            compilationDtoList.add(CompilationMapper.toDto(c, dtoList));
         }
         return compilationDtoList;
     }

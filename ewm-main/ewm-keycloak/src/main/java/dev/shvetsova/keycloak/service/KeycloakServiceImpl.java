@@ -1,4 +1,4 @@
-package dev.shvetsova.ewmc.users.keycloak;
+package dev.shvetsova.keycloak.service;
 
 import dev.shvetsova.ewmc.dto.user.NewUserRequest;
 import dev.shvetsova.ewmc.dto.user.UserDto;
@@ -6,6 +6,7 @@ import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.utils.Constants;
 import jakarta.ws.rs.core.Response;
+import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -21,16 +22,39 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class KeycloakService {
+public class KeycloakServiceImpl implements KeycloakService {
     private final RealmResource realmResource;
     private final UsersResource usersResource;
 
-    public KeycloakService(@Value("${keycloak.realm}") String realm, Keycloak keycloak) {
+    public KeycloakServiceImpl(@Value("${keycloak.realm}") String realm, Keycloak keycloak) {
         this.realmResource = keycloak.realm(realm);
         this.usersResource = realmResource.users();
     }
 
-    public Response createKeycloakUser(NewUserRequest userDto) {
+    private CredentialRepresentation createPasswordCredentials(String password) {
+        CredentialRepresentation passwordCredentials = new CredentialRepresentation();
+        passwordCredentials.setTemporary(false);
+        passwordCredentials.setType(CredentialRepresentation.PASSWORD);
+        passwordCredentials.setValue(password);
+        return passwordCredentials;
+    }
+
+
+    public UserDto findUserById(String userId) {
+        List<UserRepresentation> users = usersResource.search("id:" + userId);
+        if (users.isEmpty())
+            throw new NotFoundException(String.format(Constants.USER_WITH_ID_D_WAS_NOT_FOUND, userId));
+
+        return UserDto.builder()
+                .id(userId)
+                .name(users.get(0).getUsername())
+                .email(users.get(0).getEmail())
+                .build();
+    }
+
+
+    @Override
+    public String registerUser(NewUserRequest userDto) {
         List<UserRepresentation> userList = usersResource.searchByUsername(userDto.getName(), true);
         if (!userList.isEmpty()) {
             throw new ConflictException(String.format("Account with username='%s' already exist.", userDto.getName()));
@@ -48,33 +72,19 @@ public class KeycloakService {
         kcUser.setEmail(userDto.getEmail());
         kcUser.setEnabled(true);
         kcUser.setEmailVerified(false);
-        var response = usersResource.create(kcUser);
-        return response;
-    }
-
-    private CredentialRepresentation createPasswordCredentials(String password) {
-        CredentialRepresentation passwordCredentials = new CredentialRepresentation();
-        passwordCredentials.setTemporary(false);
-        passwordCredentials.setType(CredentialRepresentation.PASSWORD);
-        passwordCredentials.setValue(password);
-        return passwordCredentials;
-    }
-
-
-    public void addRole(String userId, List<String> roles) {
-        List<RoleRepresentation> kcRoles = new ArrayList<>();
-        for (String role : roles) {
-            RoleRepresentation representation = realmResource.roles().get(role).toRepresentation();
-            kcRoles.add(representation);
+        Response response = usersResource.create(kcUser);
+        String createdId = CreatedResponseUtil.getCreatedId(response);
+        List<String> defaultRole = userDto.getDefaultRole();
+        if (defaultRole != null && !defaultRole.isEmpty()) {
+            addRole(createdId, defaultRole);
         }
-
-        UserResource user = usersResource.get(userId);
-        user.roles().realmLevel().add(kcRoles);
+        return createdId;
     }
 
-    public void deleteUser(String userId) {
+    @Override
+    public void delete(String userId) {
         List<UserRepresentation> users = usersResource.search("id:" + userId);
-        if(users.isEmpty()) return;
+        if (users.isEmpty()) return;
 
         UserResource user = usersResource.get(userId);
         user.remove();
@@ -99,11 +109,14 @@ public class KeycloakService {
 
     }
 
-    public UserRepresentation findUserById(String userId) {
-        List<UserRepresentation> users = usersResource.search("id:" + userId);
-        if (users.isEmpty())
-            throw new NotFoundException(String.format(Constants.USER_WITH_ID_D_WAS_NOT_FOUND, userId));
+    private void addRole(String userId, List<String> roles) {
+        List<RoleRepresentation> kcRoles = new ArrayList<>();
+        for (String role : roles) {
+            RoleRepresentation representation = realmResource.roles().get(role).toRepresentation();
+            kcRoles.add(representation);
+        }
 
-        return users.get(0);
+        UserResource user = usersResource.get(userId);
+        user.roles().realmLevel().add(kcRoles);
     }
 }
