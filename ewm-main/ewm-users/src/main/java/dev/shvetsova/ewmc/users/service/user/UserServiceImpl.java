@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static dev.shvetsova.ewmc.utils.Constants.*;
+import static dev.shvetsova.ewmc.utils.ProjectUtils.createPageRequest;
+import static dev.shvetsova.ewmc.utils.ProjectUtils.isNullOrEmpty;
 
 
 @Service
@@ -46,8 +48,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUsers(List<String> ids, Integer from, Integer size) {
-        final PageRequest page = PageRequest.of(from / size, size);
-        final List<User> users = (ids == null || ids.isEmpty())
+        final PageRequest page = createPageRequest(from, size);
+        final List<User> users = isNullOrEmpty(ids)
                 ? userRepository.findAll(page).getContent()
                 : userRepository.findAllByUidIn(ids, page).getContent();
         return users.stream()
