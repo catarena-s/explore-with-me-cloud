@@ -1,0 +1,65 @@
+graph TB
+    %% Клиент
+    Client[Клиент]
+    
+    %% Инфраструктурные сервисы
+    subgraph Infrastructure["Инфраструктурные сервисы"]
+        Gateway[API Gateway]
+        Eureka[Eureka Server]
+        ConfigServer[Config Server]
+        Keycloak[Keycloak]
+        RabbitMQ[RabbitMQ]
+    end
+    
+    %% Общие модули
+    subgraph Common["Общие модули"]
+        DTO[ewm-dto]
+        Utils[ewm-utils]
+    end
+    
+    %% Бизнес-сервисы
+    subgraph Business["Бизнес-сервисы"]
+        Users[ewm-users]
+        Event[ewm-event]
+        Request[ewm-request]
+        Compilation[ewm-compilation]
+        Subscription[ewm-subscription]
+        Notification[ewm-notification]
+        Stats[ewm-stats]
+    end
+    
+    %% Базы данных
+    Databases[("Базы данных<br/>PostgreSQL")]
+    
+    %% Клиентские запросы
+    Client --> Gateway
+    Gateway --> Business
+    
+    %% Инфраструктурные связи
+    Business -.-> Eureka
+    Gateway -.-> Eureka
+    ConfigServer -.-> Business
+    ConfigServer -.-> Gateway
+    Keycloak -.-> Business
+    Keycloak -.-> Gateway
+    
+    %% Зависимости от общих модулей
+    Business -.-> Common
+    
+    %% Межсервисное взаимодействие
+    Business <-->|OpenFeign| Business
+    Business <--> RabbitMQ
+    
+    %% Подключение к базам данных
+    Business --> Databases
+    
+    %% Стили
+    classDef infrastructure fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    classDef business fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef common fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef database fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    
+    class Gateway,Eureka,ConfigServer,Keycloak,RabbitMQ infrastructure
+    class Users,Event,Request,Compilation,Subscription,Notification,Stats business
+    class DTO,Utils common
+    class Databases database
