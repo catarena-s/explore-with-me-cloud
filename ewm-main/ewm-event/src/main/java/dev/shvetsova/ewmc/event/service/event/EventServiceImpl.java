@@ -31,6 +31,7 @@ import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.exception.ValidateException;
 import dev.shvetsova.ewmc.utils.Constants;
+import dev.shvetsova.ewmc.utils.ProjectUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -78,7 +79,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getPublishedEvents(String userId, int from, int size) {
-        final PageRequest page = PageRequest.of(from / size, size);
+        final PageRequest page = ProjectUtils.createPageRequest(from, size);
         final List<Event> events = eventRepository.findAllByInitiatorId(userId, page).getContent();
         return events.stream()
                 .map(EventMapper::toShortDto)
@@ -99,10 +100,10 @@ public class EventServiceImpl implements EventService {
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Integer from, Integer size) {
 
-        confirmStartBeforeEnd(rangeStart, rangeEnd);
+        ProjectUtils.validateDateRange(rangeStart, rangeEnd);
 
         final List<EventState> stateList = (states == null) ? null : getEventStates(states);
-        final PageRequest page = PageRequest.of(from / size, size);
+        final PageRequest page = ProjectUtils.createPageRequest(from, size);
         final EventFilter filter = EventFilter.builder()
                 .initiatorIn(users)
                 .categoryIn(categories)
@@ -155,7 +156,7 @@ public class EventServiceImpl implements EventService {
                                                   Boolean onlyAvailable,
                                                   SortType sort,//по дате события или по количеству просмотров
                                                   Integer from, Integer size, HttpServletRequest request) {
-        confirmStartBeforeEnd(rangeStart, rangeEnd);
+        ProjectUtils.validateDateRange(rangeStart, rangeEnd);
 
         final PageRequest page = getPageRequest(sort, from, size);
 
@@ -422,14 +423,14 @@ public class EventServiceImpl implements EventService {
 
     private PageRequest getPageRequest(SortType sort, Integer from, Integer size) {
         return (sort == null)
-                ? PageRequest.of(from / size, size)
+                ? ProjectUtils.createPageRequest(from, size)
                 : getPageRequestWithSort(from, size, sort);
     }
 
     private PageRequest getPageRequestWithSort(Integer from, Integer size, SortType sortType) {
         return sortType.equals(SortType.VIEWS)
-                ? PageRequest.of(from / size, size)
-                : PageRequest.of(from / size, size).withSort(Sort.by(sortType.getName()));
+                ? ProjectUtils.createPageRequest(from, size)
+                : ProjectUtils.createPageRequest(from, size).withSort(Sort.by(sortType.getName()));
     }
 
     /**
@@ -540,11 +541,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void confirmStartBeforeEnd(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
-        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
-            throw new ValidateException("'rangeStart' must be before 'rangeEnd'");
-        }
-    }
 
     private void confirmEventDateIsAfterCurrent(LocalDateTime eventDate, int hours) {
         LocalDateTime currentTime = LocalDateTime.now();

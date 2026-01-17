@@ -13,6 +13,7 @@ import dev.shvetsova.ewmc.dto.compilation.UpdateCompilationRequest;
 import dev.shvetsova.ewmc.dto.event.EventShortDto;
 import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
+import dev.shvetsova.ewmc.utils.ProjectUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -43,14 +44,14 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private List<EventShortDto> getEventListForCompilation(List<Long> eventIds) {
-        return (eventIds != null)
+        return !ProjectUtils.isNullOrEmpty(eventIds)
                 ? eventClient.findEventsByIds(eventIds)
                 : Collections.emptyList();
     }
 
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
-        final PageRequest page = PageRequest.of(from / size, size);
+        final PageRequest page = ProjectUtils.createPageRequest(from, size);
         final List<Compilation> compilations = (pinned == null)
                 ? compilationRepository.findAll(page).getContent()
                 : compilationRepository.findAllByPinned(pinned, page).getContent();

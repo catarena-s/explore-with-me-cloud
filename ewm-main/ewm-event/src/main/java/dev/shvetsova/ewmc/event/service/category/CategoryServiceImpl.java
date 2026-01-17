@@ -9,6 +9,7 @@ import dev.shvetsova.ewmc.event.repo.EventRepository;
 import dev.shvetsova.ewmc.exception.ConflictException;
 import dev.shvetsova.ewmc.exception.NotFoundException;
 import dev.shvetsova.ewmc.utils.Constants;
+import dev.shvetsova.ewmc.utils.ProjectUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
@@ -77,7 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getCategories(Integer from, Integer size) {
-        final PageRequest page = PageRequest.of(from / size, size);
+        final PageRequest page = ProjectUtils.createPageRequest(from, size);
         final List<Category> categories = categoryRepository.findAll(page).getContent();
         return categories.stream()
                 .map(CategoryMapper::toDto)
